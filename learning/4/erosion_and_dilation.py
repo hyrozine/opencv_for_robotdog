@@ -9,7 +9,7 @@ img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # threshold(src, thresh, maxVal, type)
 # type : THRESH_BINARY THRESH_BINARY_INV THRESH_TRUNC THRESH_TOZERO THRESH_TOZERO_INV
-ret1,img_bin = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
+ret,img_bin = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
 
 # adaptiveThreshold(img, maxVal, adaptiveMethod, type, blockSize, C)
 # method: ADAPTIVE_THRESH_MEAN_C  ADAPTIVE_THRESH_GAUSSIAN_C

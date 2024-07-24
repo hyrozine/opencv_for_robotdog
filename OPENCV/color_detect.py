@@ -19,7 +19,7 @@ def detect_blue_upstair(frame):
     
     min_area = 50
     filtered_contours = [cnt for cnt in cnts if cv2.contourArea(cnt) > min_area]
-    print(filtered_contours)
+    # print(filtered_contours)
     
     if filtered_contours == []:
         print("rect isn't big enough")

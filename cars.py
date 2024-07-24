@@ -18,7 +18,7 @@ carnum = 0
 offset = 6
 
 
-cap = cv2.VideoCapture('/home/hyrozine/cars.mp4')
+cap = cv2.VideoCapture('/home/hyrozine/Videos/cars.mp4')
 
 # bgsubmog = cv2.createBackgroundSubtractorMOG2()
 bgsubmog = cv2.createBackgroundSubtractorKNN()
