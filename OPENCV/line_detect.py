@@ -79,10 +79,11 @@ def mid_line_detect(frame):
     mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
     # mask = cv2.fillPoly(mask, np.array([[[150,mask.shape[0] // 3 * 2], [350, mask.shape[0] // 2], [1000, mask.shape[0] // 2], [1200, mask.shape[0] // 3 * 2]]]), color = 255)   # TODO: need to be specified
     cv2.imshow('mask', mask)
+
     # print(mask.shape[0] // 3)
     masked_edge = cv2.bitwise_and(edge, mask)
     cv2.imshow('mask_edge', masked_edge)
-    # print(masked_edge.shape)
+    print(masked_edge.shape)
      
     lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 40, maxLineGap = 20)
     # print(lines)
@@ -173,3 +174,4 @@ def line_track(frame, err=1, type='default', angle_limit=20):
     
     # my_uart.set_data(LEFT, 'direction')
     # my_uart.set_data(0, 'angle')
+    return 0, 0 

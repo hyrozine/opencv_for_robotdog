@@ -1,14 +1,22 @@
 import cv2
 import numpy as np
-from utils import COLOR_THRESHOLD
+from utils import COLOR_THRESHOLD, img_size
+
 
 def detect_ball(frame, threshold):
+    roi = np.array([[[0, img_size[1]], [0, img_size[1] // 2], [img_size[0], img_size[1] // 2], [img_size[0], img_size[1]]]])
+
     hsv = COLOR_THRESHOLD[threshold]
     hsv_low =  np.array([hsv[0], hsv[1], hsv[2]])
     hsv_upper = np.array([hsv[3], hsv[4], hsv[5]])
     imgHSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     # print(hsv_low, hsv_upper)
     mask = cv2.inRange(imgHSV, hsv_low, hsv_upper)
+
+    roi_mask = np.zeros_like(mask)
+    roi_mask = cv2.fillPoly(roi_mask, roi, color = 255)
+    mask = cv2.bitwise_and(mask, roi_mask)
+    cv2.imshow('mask', mask)   
 
     cnts, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -35,7 +43,7 @@ def detect_ball(frame, threshold):
     erode = cv2.erode(dilation, kernel, iterations=1)
 
     edges = cv2.Canny(erode, 0, 0)
-    cv2.imshow('edges', edges)
+    # cv2.imshow('edges', edges)
 
     x,y,w,h = cv2.boundingRect(filtered_contours[0])
     cv2.rectangle(frame, (x, y), (w+x, h+y), (255, 0, 0), 2)
@@ -50,9 +58,9 @@ def detect_ball(frame, threshold):
             radius = circle[2]
             cv2.circle(frame, center, radius, (0, 0, 255), 2)
 
-        return circles, frame
+        return True
     else:
-        return None, frame
+        return False
 
 
     
