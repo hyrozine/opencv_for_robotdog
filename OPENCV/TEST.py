@@ -1,4 +1,5 @@
 import cv2
+from matplotlib.pyplot import flag
 import numpy as np
 from utils import COLOR_THRESHOLD
 import color_detect
@@ -23,33 +24,33 @@ from line_detect import line_track
 #         print(x,y)
         
 
-path = '/home/hyrozine/imgs/orange.jpg'
+# path = '/home/hyrozine/imgs/orange.jpg'
 
-# cv2.namedWindow("image")
-# cv2.setMouseCallback("image", on_EVENT_LBUTTONDOWN)
+# # cv2.namedWindow("image")
+# # cv2.setMouseCallback("image", on_EVENT_LBUTTONDOWN)
 
-img = cv2.imread(path)
+# img = cv2.imread(path)
 
-# line_track(img)
-color_detect.detect_blue_upstair(img)
-print(img.shape)
-cv2.imshow('img', img)        
-key = cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-# video = cv2.VideoCapture(0)
-
-# while video.isOpened():
-#         ret,frame = video.read()
-#         if frame is None:
-#             break
-#         if ret == True:
-#             # _, result = ball_detect.detect_ball(frame, 'ORANGE')
-#             direct, angle_deg = line_track(frame)
-#             cv2.imshow('video',frame)
-#             key = cv2.waitKey(1)
-#             if(key & 0xFF == ord('q')) :
-#                 break
-
-# video.release()
+# # line_track(img)
+# color_detect.detect_blue_upstair(img)
+# print(img.shape)
+# cv2.imshow('img', img)        
+# key = cv2.waitKey(0)
 # cv2.destroyAllWindows()
+
+video = cv2.VideoCapture(0)
+
+while video.isOpened():
+        ret,frame = video.read()
+        if frame is None:
+            break
+        if ret == True:
+            # _, result = ball_detect.detect_ball(frame, 'ORANGE')
+            track_flag = line_track(frame)
+            cv2.imshow('video',frame)
+            key = cv2.waitKey(1)
+            if(key & 0xFF == ord('q')) :
+                break
+
+video.release()
+cv2.destroyAllWindows()

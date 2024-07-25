@@ -1,3 +1,4 @@
+from ast import If
 import cv2
 import numpy as np
 import math
@@ -147,15 +148,13 @@ def line_track(frame, err=1, type='default', angle_limit=20):
                 #else:
                     #direct = STRAIGHT
 
-        elif type == 'turn':  # 弯道修正
-            if mid_x / 2 < (w/2 - offset_turn):  # 走到弯道内测，需要修正 ,外侧不需要修正
+        elif type == 'turn':  
+            if mid_x / 2 < (w/2 - offset_turn):  
                 direct = LEFT
                 angle_err = w/2 - mid_x
                 angle_deg = int((angle_deg + angle_err / 2))
-                if angle_deg < 0:
-                    angle_deg = 0
-                if angle_deg > angle_limit:
-                    angle_deg = angle_limit
+                limit_angle(angle_deg, angle_limit)
+                direct = LEFT
         else:
             angle_err = w/2 - offset_default - mid_x
             angle_deg = int(angle_deg + angle_err / 2)
@@ -170,8 +169,8 @@ def line_track(frame, err=1, type='default', angle_limit=20):
         # my_uart.set_data(angle_deg, 'angle')
         print('direct', direct)
         print('angle_deg', angle_deg)
-        return direct, angle_deg
+        return True
     
     # my_uart.set_data(LEFT, 'direction')
     # my_uart.set_data(0, 'angle')
-    return 0, 0 
+    return False

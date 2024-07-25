@@ -27,8 +27,9 @@ STATE = {
     'state_2_blue_climb': 2,
     'state_3_red_turn': 3,
     'state_4_user': 4,
-    'state_5_orage_end': 5,
-    'state_debug': 6
+    'state_5_orange_end': 5,
+    'state_6_turn_in': 6,
+    'state_debug': 7
 }
 
 LEFT = 1

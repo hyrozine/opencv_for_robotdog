@@ -1,4 +1,7 @@
+from pickle import GLOBAL
 import cv2
+from matplotlib.widgets import EllipseSelector
+from pyparsing import line
 from utils import COLOR, STATE
 
 """
@@ -18,7 +21,8 @@ import pyserial
 
 yellow_time = 0
 
-FLAG_BALL_TYPE = { 'PRUPLE': False, 'BROWN': False}
+global FLAG_BALL_TYPE 
+ball_user = 0
 
 light = Timer(2, freq=50000).channel(1, Timer.PWM, pin=Pin("P6"))
 
@@ -34,14 +38,16 @@ class State_Machine():
     def state_machine_exe(self, frame):
         #print("now:",self.state)
 
-        
         if self.state == STATE['state_1_recognize_ball']:
-            if self.find_ball(frame) is True:  
+            if self.find_ball(frame) is True:
+                if FLAG_BALL_TYPE['BROWN'] == True:
+                    ball_user = 1
+                else:
+                    ball_user = 2  
                 my_uart.send_data()
                 self.state_trans(STATE['state_2_blue_climb'])
             else:
-                my_uart.set_data(RIGHT, 'direction')
-                my_uart.set_data(45, 'angle')
+                line_track(frame.copy())
                 my_uart.send_data()
             my_uart.clear_data()
 
@@ -68,52 +74,28 @@ class State_Machine():
                 my_uart.send_data()
             my_uart.clear_data()
         elif self.state == STATE['state_4_user']:
-            if self.find_user(frame, )
-            self.state_trans(STATE['state_6_grass'])
-        elif self.state == STATE['state_5_user2']:
-            if self.find_user(img, 2) is True:
+            if self.find_user(frame, ball_user):
                 my_uart.send_data()
-                self.state_trans(STATE['state_7_user3'])
+                self.state_trans(STATE['state_5_orange_end'])
+            else:
+                line_track(frame.copy(), err=1, type = 'grass', angle_limit=30)
+            my_uart.clear_data()
+        elif self.state == STATE['state_5_orange_end']:
+            if self.find_orange_end(frame, 2) is True:
+                my_uart.send_data()
+                self.state_trans(STATE['state_6_turn_in'])
                 #light.pulse_width_percent(10)  # 控制亮度 0~100完成
             else:
-                self.now_time = pyb.millis()
-                if self.now_time - self.yellow_time < 81000:
-                    my_line.line_track(img.copy())
-                    my_line.line_track(img.copy(), err=1, type='grass', angle_limit=30)
-                elif self.now_time - self.yellow_time < 105000:
-                    print("过环岛")
-                    #light.pulse_width_percent(0)
-                    #light.pulse_width_percent(3)
-                    #my_uart.set_data(1, 'isOpen')
-                    my_line.line_track(img.copy(), err=1, angle_limit=30)
-                else:
-                    #my_uart.set_data(2, 'isOpen')
-                    #my_line.line_track(img.copy(), err=1, type='grass')
-                    my_line.line_track(img.copy(), err=1, type='grass', angle_limit=30)
+                line_track(frame.copy(), err=1, type='grass', angle_limit=30)
                 my_uart.send_data()
             my_uart.clear_data()
-            """ 到达草地 """
-        elif self.state == STATE['state_6_grass']:
-            if self.find_grass(img) is True:
+        elif self.state == STATE['state_6_turn_in']:
+            if line_track(frame.copy(), err = 10, type = 'turn', angle_limit=50):
                 my_uart.send_data()
-                light.pulse_width_percent(18)
-                self.state_trans(STATE['state_2_user1'])
             else:
-                my_line.line_track(img.copy(), err=1, type='grass', angle_limit=30)
-                my_uart.send_data()
-            my_uart.clear_data()
-            """ 到达用户3区域 """
-        elif self.state == STATE['state_7_user3']:
-            if self.find_user(img, 3) is True:
-                my_uart.send_data()
-                self.state_trans(STATE['state_1_begin'])
-                #light.pulse_width_percent(10)  # 控制亮度 0~100
-            else:
-                #if detect_grass(img) is True:
-                    #my_line.line_track_grass(img.copy())
-                #else:
-                    #my_line.line_track(img.copy(), type='grass', err=1)
-                my_line.line_track(img.copy(), err=1, type='grass', angle_limit=30)
+                my_uart.set_data(STRAIGHT, 'direction')
+                my_uart.set_data(90, 'angle')
+                self.state_trans(STATE['state_1_recognize_ball'])
                 my_uart.send_data()
             my_uart.clear_data()
         else:
@@ -164,16 +146,18 @@ class State_Machine():
     
 
     def find_ball(self, img):
-        self.FLAG_BALL_TYPE = { 'PRUPLE': False, 'BROWN': False}
-        self.FLAG_BALL_TYPE['PRUPLE'] = detect_ball(img, 'PRUPLE')
-        self.FLAG_BALL_TYPE['BROWN'] = detect_ball(img, 'BROWN')
+        global FLAG_BALL_TYPE
+        FLAG_BALL_TYPE = { 'PRUPLE': False, 'BROWN': False}
+        FLAG_BALL_TYPE['PRUPLE'] = detect_ball(img, 'PRUPLE')
+        FLAG_BALL_TYPE['BROWN'] = detect_ball(img, 'BROWN')
+
         
-        if  self.FLAG_BALL_TYPE['PRUPLE'] is True or self.FLAG_BALL_TYPE['BROWN'] is True:
+        if  FLAG_BALL_TYPE['PRUPLE'] is True or FLAG_BALL_TYPE['BROWN'] is True:
             my_uart.set_data(1, 'ball')  # 检测到球
-            if self.FLAG_BALL_TYPE['PRUPLE'] is True:
+            if FLAG_BALL_TYPE['PRUPLE'] is True:
                 my_uart.set_data(COLOR['PRUPLE'], 'color')
                 print("找到紫球")
-            elif self.FLAG_BALL_TYPE['BROWN'] is True:
+            elif FLAG_BALL_TYPE['BROWN'] is True:
                 my_uart.set_data(COLOR['BROWN'], 'color')
                 print("找到棕球")
             return True
