@@ -116,7 +116,7 @@ def mid_line_detect(frame):
 
     cv2.line(frame, tuple(left_line_ret[0]), tuple(left_line_ret[1]), color=(0, 255,255), thickness = 5)
     cv2.line(frame, tuple(right_line_ret[0]), tuple(right_line_ret[1]), color=(0, 255,255), thickness = 5)
-    cv2.line(frame, tuple(mid_lower), tuple(mid_upper), color=(0, 255,255), thickness = 5)
+    cv2.line(frame, tuple(mid_lower), tuple(mid_upper), color=(0, 0,255), thickness = 5)
 
     angle = calculate_angle(mid_upper, mid_lower)
     mid_x = (mid_upper[0] + mid_lower[0]) / 2

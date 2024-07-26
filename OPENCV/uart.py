@@ -2,17 +2,30 @@ import serial
 
 class Uart:
     def __init__(self):
-        self.port = '/dev/ttyUSB1'
+        self.port = '/dev/ttyUSB0'
         self.baud = 115200
         self.timeout = 1
         self.port = serial.Serial(self.port, self.baud, timeout = self.timeout)
-        self.port.close()
-        if not self.port.is_open():
+        if not self.port.is_open:
             self.port.open()
         self.datasets = {'header1': 100, 'header2': 8, 'color': 0, 'direction': 0, 'angle': 0, 'isOpen': 0, 'ball': 0, 'end': 101}
 
     def port_close(self):
-        self.port.close()
+        if self.port.is_open:
+            self.port.close()
+
+    def scan_all_ports():
+        TTY_list = []
+        ports_list = serial.tools.list_ports.comports()
+        if len(ports_list) <= 0:
+            print("no port detected")
+        else:
+            print("ports available: ")
+            for comfort in ports_list:
+                TTY_num = list(comfort)[0]
+                print(TTY_num, "  /  ", list(comfort)[1])
+                TTY_list.append(TTY_num)
+        return TTY_list
 
     def set_data(self, data_value, data_position):
         self.datasets[data_position] = data_value
@@ -31,7 +44,7 @@ class Uart:
         datas = bytearray(allData)
         self.port.write(datas)
 
-    def recieve_data(self):
+    def receive_data(self):
         info = '0'
         info = self.port.readline()
         print(info)

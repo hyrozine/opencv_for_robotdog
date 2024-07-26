@@ -1,9 +1,8 @@
-from utils import COLOR, STATE
+from utils import COLOR, STATE, LEFT, RIGHT, STRAIGHT
 from color_detect import detect_blue_upstair, detect_red_divpath, detect_user, detect_orange_end
 from ball_detect import detect_ball
 from line_detect import line_track
 from uart import my_uart
-from utils import COLOR, STATE, LEFT, RIGHT, STRAIGHT
 
 
 # import sensor
@@ -64,6 +63,7 @@ class State_Machine():
             my_uart.clear_data()
         elif self.state == STATE['state_4_user']:
             if self.find_user(frame, self.ball_user):
+                my_uart.set_data(1, 'isOpen')
                 my_uart.send_data()
                 self.state_trans(STATE['state_5_orange_end'])
             else:
@@ -94,39 +94,46 @@ class State_Machine():
         N = 20
         if st == STATE['state_1_recognize_ball']:
             for i in range(N):
-                info = my_uart.reveive_data()
+                info = my_uart.receive_data()
                 if '1' in info:
                     self.state = st  # 状态转移成功
-                    print("recieved ball")
+                    print("finished")
                     break
-        elif st == STATE['state_2_turn_out']:
+        elif st == STATE['state_2_blue_climb']:
             for i in range(N):
-                info = my_uart.reveive_data()
+                info = my_uart.receive_data()
                 if '2' in info:
                     self.state = st  # 状态转移成功
-                    print('turning out success')
+                    print('recieved ball')
                     # self.blue_time = pyb.millis() # TODO: 
                     break
-        elif st == STATE['state_3_blue_climb']:
+        elif st == STATE['state_3_red_turn']:
             for i in range(N):
-                info = my_uart.reveive_data()
+                info = my_uart.receive_data()
                 if '3' in info:
                     self.state = st  # 状态转移成功
                     print('upstairs!!!')
                     break
-        elif st == STATE['state_4_red_turn']:
+        elif st == STATE['state_4_user']:
             for i in range(N):
-                info = my_uart.reveive_data()
+                info = my_uart.receive_data()
                 if '4' in info:
                     self.state = st  # 状态转移成功
-                    print('near roundabout')
+                    print('near user')
                     break
-        elif st == STATE['state_5_orage_end']:
+        elif st == STATE['state_5_orange_end']:
             for i in range(N):
-                info = my_uart.reveive_data()
+                info = my_uart.receive_data()
                 if '5' in info:
                     self.state = st
-                    print('turn in!')
+                    print('user has been found!')
+                    break
+        elif st == STATE['state_6_turn_in']:
+            for i in range(N):
+                info = my_uart.receive_data()
+                if '6' in info:
+                    self.state = st
+                    print('TO THE END!')
                     break
         else:
             pass
