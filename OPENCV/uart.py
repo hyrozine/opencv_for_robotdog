@@ -1,22 +1,21 @@
-from pyb import UART
-from utils import COLOR
+import serial 
 
-
-class Uart():
+class Uart:
     def __init__(self):
-        self.uart = UART(3, 115200)
-        self.uart.init(115200, bits=8, parity=None, stop=1)
+        self.port = '/dev/ttyUSB1'
+        self.baud = 115200
+        self.timeout = 1
+        self.port = serial.Serial(self.port, self.baud, timeout = self.timeout)
+        self.port.close()
+        if not self.port.is_open():
+            self.port.open()
         self.datasets = {'header1': 100, 'header2': 8, 'color': 0, 'direction': 0, 'angle': 0, 'isOpen': 0, 'ball': 0, 'end': 101}
+
+    def port_close(self):
+        self.port.close()
 
     def set_data(self, data_value, data_position):
         self.datasets[data_position] = data_value
-
-    def clear_data(self):
-        self.datasets['color'] = 0
-        self.datasets['direction'] = 0
-        self.datasets['angle'] = 0
-        self.datasets['isOpen'] = 0
-        self.datasets['ball'] = 0
 
     def send_data(self):
         allData = []
@@ -30,14 +29,19 @@ class Uart():
         allData.append(self.datasets['ball'])
         allData.append(self.datasets['end'])
         datas = bytearray(allData)
-        self.uart.write(datas)
+        self.port.write(datas)
 
-    def reveive_data(self):
+    def recieve_data(self):
         info = '0'
-        if self.uart.any():
-            info = self.uart.readline()  # 1 2 3 4 5 6 7
-            print(info)
+        info = self.port.readline()
+        print(info)
         return info
-
-
+    
+    def clear_data(self):
+        self.datasets['color'] = 0
+        self.datasets['direction'] = 0
+        self.datasets['angle'] = 0
+        self.datasets['isOpen'] = 0
+        self.datasets['ball'] = 0
+    
 my_uart = Uart()
