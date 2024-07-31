@@ -17,7 +17,7 @@ def detect_blue_upstair(frame):
     roi_mask = np.zeros_like(mask)
     roi_mask = cv2.fillPoly(roi_mask, roi, color = 255)
     mask = cv2.bitwise_and(mask, roi_mask)
-    cv2.imshow('mask', mask)   
+    # cv2.imshow('mask', mask)   
 
     cnts, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -41,7 +41,7 @@ def detect_blue_upstair(frame):
 
     ratio = round(w/h, 2)
     ratio_min = 1  # TODO: need to be specify
-    ratio_max = 2  # TODO: need to be specify
+    ratio_max = 10  # TODO: need to be specify
     print(ratio)
 
     if not(ratio <= ratio_max and ratio_min <= ratio):
@@ -65,7 +65,7 @@ def detect_red_divpath(frame):
     roi_mask = np.zeros_like(mask)
     roi_mask = cv2.fillPoly(roi_mask, roi, color = 255)
     mask = cv2.bitwise_and(mask, roi_mask)
-    cv2.imshow('mask', mask)
+    # cv2.imshow('mask', mask)
 
     cnts, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -73,9 +73,9 @@ def detect_red_divpath(frame):
         print("color isn't detected")
         return False
     
-    min_area = 50
+    min_area = 50     # TODO: need to be specify
     filtered_contours = [cnt for cnt in cnts if cv2.contourArea(cnt) > min_area]
-    print(filtered_contours)
+    # print(filtered_contours)
     
     if filtered_contours == []:
         print("rect isn't big enough")
@@ -89,7 +89,7 @@ def detect_red_divpath(frame):
 
     ratio = round(w/h, 2)
     ratio_min = 1  # TODO: need to be specify
-    ratio_max = 2  # TODO: need to be specify
+    ratio_max = 10  # TODO: need to be specify
     print(ratio)
     if not(ratio <= ratio_max and ratio_min <= ratio):
         print("rect isn't valid")
@@ -113,7 +113,7 @@ def detect_user(frame, id: int):
     roi_mask = np.zeros_like(mask)
     roi_mask = cv2.fillPoly(roi_mask, roi, color = 255)
     mask = cv2.bitwise_and(mask, roi_mask)
-    cv2.imshow('mask', mask)
+    # cv2.imshow('mask', mask)
 
     cnts, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -121,9 +121,9 @@ def detect_user(frame, id: int):
         print("color isn't detected")
         return False
     
-    min_area = 50
+    min_area = 50   # TODO: need to be specify
     filtered_contours = [cnt for cnt in cnts if cv2.contourArea(cnt) > min_area]
-    print(filtered_contours)
+    # print(filtered_contours)
     
     if filtered_contours == []:
         print("rect isn't big enough")
@@ -137,7 +137,7 @@ def detect_user(frame, id: int):
 
     ratio = round(w/h, 2)
     ratio_min = 1  # TODO: need to be specify
-    ratio_max = 2  # TODO: need to be specify
+    ratio_max = 10  # TODO: need to be specify
     print(ratio)
     if not(ratio <= ratio_max and ratio_min <= ratio):
         print("rect isn't valid")
@@ -160,7 +160,7 @@ def detect_orange_end(frame):
     roi_mask = np.zeros_like(mask)
     roi_mask = cv2.fillPoly(roi_mask, roi, color = 255)
     mask = cv2.bitwise_and(mask, roi_mask)
-    cv2.imshow('mask', mask)
+    # cv2.imshow('mask', mask)
 
     cnts, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -168,9 +168,9 @@ def detect_orange_end(frame):
         print("color isn't detected")
         return False
     
-    min_area = 50
+    min_area = 50   # TODO: need to be specify
     filtered_contours = [cnt for cnt in cnts if cv2.contourArea(cnt) > min_area]
-    print(filtered_contours)
+    # print(filtered_contours)
     
     if filtered_contours == []:
         print("rect isn't big enough")
@@ -184,7 +184,7 @@ def detect_orange_end(frame):
 
     ratio = round(w/h, 2)
     ratio_min = 1  # TODO: need to be specify
-    ratio_max = 2  # TODO: need to be specify
+    ratio_max = 10  # TODO: need to be specify
     print(ratio)
     if not(ratio <= ratio_max and ratio_min <= ratio):
         print("rect isn't valid")

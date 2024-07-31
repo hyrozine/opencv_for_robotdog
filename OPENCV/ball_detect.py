@@ -16,7 +16,7 @@ def detect_ball(frame, threshold):
     roi_mask = np.zeros_like(mask)
     roi_mask = cv2.fillPoly(roi_mask, roi, color = 255)
     mask = cv2.bitwise_and(mask, roi_mask)
-    cv2.imshow('mask', mask)   
+    # cv2.imshow('mask', mask)   
 
     cnts, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     

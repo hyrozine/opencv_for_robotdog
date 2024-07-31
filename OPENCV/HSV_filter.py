@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 
-path = '/home/hyrozine/imgs/orange.jpg'
-
 def stackImages(scale,imgArray):
     rows = len(imgArray)
     cols = len(imgArray[0])
