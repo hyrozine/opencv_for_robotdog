@@ -1,7 +1,6 @@
 import cv2
-from matplotlib.pyplot import flag
 import numpy as np
-from utils import COLOR_THRESHOLD
+from utils import COLOR_THRESHOLD, img_size
 import color_detect
 import ball_detect
 from line_detect import line_track

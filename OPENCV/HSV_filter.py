@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from utils import img_size
 
 def stackImages(scale,imgArray):
     rows = len(imgArray)
@@ -35,7 +36,7 @@ def stackImages(scale,imgArray):
 def trackbarcb(void):
     pass
 
-cap = cv2.VideoCapture(0)
+video = cv2.VideoCapture(0)
 
 cv2.namedWindow("TrackBars")
 cv2.resizeWindow("TrackBars", 640, 240)
@@ -47,8 +48,14 @@ cv2.createTrackbar('SAT MAX',"TrackBars", 255, 255, trackbarcb)
 cv2.createTrackbar('VAL MIN',"TrackBars", 0, 255, trackbarcb)
 cv2.createTrackbar('VAL MAX',"TrackBars", 255, 255, trackbarcb)
 
+cv2.namedWindow('video', cv2.WINDOW_AUTOSIZE)
+cv2.resizeWindow('video', 640, 480)
+
 while True:
-    ret, frame = cap.read()
+    ret, frame = video.read()
+    video.set(cv2.CAP_PROP_FRAME_WIDTH, img_size[0])
+    video.set(cv2.CAP_PROP_FRAME_HEIGHT, img_size[1])
+    video.set(cv2.CAP_PROP_FPS, 30)
     imgHSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     hue_min = cv2.getTrackbarPos("HUE MIN","TrackBars")
@@ -66,13 +73,13 @@ while True:
     imgResult = cv2.bitwise_and(frame, frame, mask = mask)
 
     imgStack = stackImages(0.9, [[frame,imgHSV],[mask,imgResult]])
-    cv2.imshow('imgStack',imgStack)
+    cv2.imshow('video',imgStack)
 
     key = cv2.waitKey(1)
     if(key & 0xFF == ord('q')) :
         break
 
-cap.release()
+video.release()
 cv2.destroyAllWindows()
 
 
