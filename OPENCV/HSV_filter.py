@@ -49,13 +49,13 @@ cv2.createTrackbar('VAL MIN',"TrackBars", 0, 255, trackbarcb)
 cv2.createTrackbar('VAL MAX',"TrackBars", 255, 255, trackbarcb)
 
 cv2.namedWindow('video', cv2.WINDOW_AUTOSIZE)
-cv2.resizeWindow('video', 640, 480)
+cv2.resizeWindow('video', img_size[0], img_size[1])
 
 while True:
     ret, frame = video.read()
-    video.set(cv2.CAP_PROP_FRAME_WIDTH, img_size[0])
-    video.set(cv2.CAP_PROP_FRAME_HEIGHT, img_size[1])
-    video.set(cv2.CAP_PROP_FPS, 30)
+    # video.set(cv2.CAP_PROP_FRAME_WIDTH, img_size[0])
+    # video.set(cv2.CAP_PROP_FRAME_HEIGHT, img_size[1])
+    # video.set(cv2.CAP_PROP_FPS, 30)
     imgHSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     hue_min = cv2.getTrackbarPos("HUE MIN","TrackBars")

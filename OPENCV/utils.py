@@ -1,4 +1,4 @@
-img_size = (640, 480)
+img_size = (1280, 720)
 
 COLOR_THRESHOLD = {
     'BLUE': [12, 40, -5, 14, -36, -14],  

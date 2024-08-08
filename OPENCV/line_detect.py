@@ -1,4 +1,3 @@
-from ast import If
 import cv2
 import numpy as np
 import math
@@ -7,7 +6,7 @@ from utils import limit_angle
 from utils import LEFT, RIGHT, STRAIGHT
 
 def calculate_slope(line):
-    x1, x2, y1, y2 = line[0]
+    x1, y1, x2, y2 = line[0]
     if x1 - x2 == 0:
         return 0
     else:
@@ -43,6 +42,7 @@ def least_squares_fit(lines):
 
 def angle_deg_and_dir(angle, err = 20):
     direct = STRAIGHT
+    angle_deg = 90
 
     if angle > 90:
         angle_deg = 180 - angle
@@ -63,8 +63,8 @@ def mid_line_detect(frame):
     angle = 0
 
     img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    ret,img_bin = cv2.threshold(img_gray, 175, 255, cv2.THRESH_BINARY) 
-    cv2.imshow('img_bin', img_bin)
+    ret,img_bin = cv2.threshold(img_gray, 90, 255, cv2.THRESH_BINARY) 
+    # cv2.imshow('img_bin', img_bin)
 
     edge = cv2.Canny(img_bin, 0, 0)
     cv2.imshow('edge', edge)
@@ -77,22 +77,22 @@ def mid_line_detect(frame):
     # pers = cv2.warpPerspective(edge, M, (1605, 640))
 
     mask = np.zeros_like(edge)
-    mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
-    # mask = cv2.fillPoly(mask, np.array([[[150,mask.shape[0] // 3 * 2], [350, mask.shape[0] // 2], [1000, mask.shape[0] // 2], [1200, mask.shape[0] // 3 * 2]]]), color = 255)   # TODO: need to be specified
+    # mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
+    mask = cv2.fillPoly(mask, np.array([[[0,mask.shape[0] // 3 * 2], [0, mask.shape[0] // 2], [1280, mask.shape[0] // 2], [1280, mask.shape[0] // 3 * 2]]]), color = 255)   # TODO: need to be specified
     cv2.imshow('mask', mask)
 
     # print(mask.shape[0] // 3)
     masked_edge = cv2.bitwise_and(edge, mask)
     cv2.imshow('mask_edge', masked_edge)
-    print(masked_edge.shape)
+    #print(masked_edge.shape)
      
     lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 40, maxLineGap = 20)
-    # print(lines)
+    print(lines)
 
     if lines is not None:
         left_lines = [line for line in lines if calculate_slope(line) > 0]
         right_lines = [line for line in lines if calculate_slope(line) < 0]
-        # print(len(left_lines) + len(right_lines))
+        print(len(left_lines) , len(right_lines))
     else:
         return 0,0
     
