@@ -67,7 +67,7 @@ def mid_line_detect(frame):
     # cv2.imshow('img_bin', img_bin)
 
     edge = cv2.Canny(img_bin, 0, 0)
-    cv2.imshow('edge', edge)
+    # cv2.imshow('edge', edge)
 
     # w = edge.shape[1]
     # h = edge.shape[0]
@@ -78,12 +78,12 @@ def mid_line_detect(frame):
 
     mask = np.zeros_like(edge)
     # mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
-    mask = cv2.fillPoly(mask, np.array([[[0,mask.shape[0] // 3 * 2], [0, mask.shape[0] // 2], [1280, mask.shape[0] // 2], [1280, mask.shape[0] // 3 * 2]]]), color = 255)   # TODO: need to be specified
-    cv2.imshow('mask', mask)
+    mask = cv2.fillPoly(mask, np.array([[[0,mask.shape[0] // 4 * 3], [0, mask.shape[0] // 2], [1280, mask.shape[0] // 2], [1280, mask.shape[0] // 4 * 3]]]), color = 255)   # TODO: need to be specified
+    # cv2.imshow('mask', mask)
 
     # print(mask.shape[0] // 3)
     masked_edge = cv2.bitwise_and(edge, mask)
-    cv2.imshow('mask_edge', masked_edge)
+    # cv2.imshow('mask_edge', masked_edge)
     #print(masked_edge.shape)
      
     lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 40, maxLineGap = 20)
