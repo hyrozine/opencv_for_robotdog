@@ -19,6 +19,7 @@ def calculate_angle(pt1, pt2):
         dx = -dx
         dy = -dy
     if dx > 0 and dy < 0:
+        dx = -dx
         dy = -dy
     angle_rad = math.atan2(dy, dx)
     angle_deg = math.degrees(angle_rad)
