@@ -41,5 +41,5 @@ def limit_angle(value, max, min=0):
     if value > max:
         value = max
     if value < 0:
-        value = 0
+        value = min
     return value

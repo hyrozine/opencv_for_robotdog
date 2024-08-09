@@ -36,8 +36,9 @@ def stackImages(scale,imgArray):
 def trackbarcb(void):
     pass
 
-video = cv2.VideoCapture(0)
-
+video = cv2.VideoCapture(0, cv2.CAP_V4L2)
+video.set(cv2.CAP_PROP_FRAME_WIDTH, img_size[0])
+video.set(cv2.CAP_PROP_FRAME_HEIGHT, img_size[1])
 cv2.namedWindow("TrackBars")
 cv2.resizeWindow("TrackBars", 640, 240)
 
@@ -48,13 +49,9 @@ cv2.createTrackbar('SAT MAX',"TrackBars", 255, 255, trackbarcb)
 cv2.createTrackbar('VAL MIN',"TrackBars", 0, 255, trackbarcb)
 cv2.createTrackbar('VAL MAX',"TrackBars", 255, 255, trackbarcb)
 
-cv2.namedWindow('video', cv2.WINDOW_AUTOSIZE)
-cv2.resizeWindow('video', img_size[0], img_size[1])
-
 while True:
     ret, frame = video.read()
-    # video.set(cv2.CAP_PROP_FRAME_WIDTH, img_size[0])
-    # video.set(cv2.CAP_PROP_FRAME_HEIGHT, img_size[1])
+
     # video.set(cv2.CAP_PROP_FPS, 30)
     imgHSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 

@@ -21,22 +21,22 @@ class State_Machine():
         self.now_time = 0
         self.blue_time = 0
         self.ball_user = 0
-        self.FLAG_BALL_TYPE
+        self.FLAG_BALL_TYPE = { 'PRUPLE': False, 'BROWN': False}
 
     def state_machine_exe(self, frame):
         #print("now:",self.state)
 
         if self.state == STATE['state_1_recognize_ball']:
-            if self.find_ball(frame) is True:
-                if self.FLAG_BALL_TYPE['BROWN'] == True:
-                    self.ball_user = 1
-                elif self.FLAG_BALL_TYPE['PRUPLE'] == True:
-                    self.ball_user = 2  
-                my_uart.send_data()
-                self.state_trans(STATE['state_2_blue_climb'])
-            else:
-                line_track(frame.copy())
-                my_uart.send_data()
+            # if self.find_ball(frame) is True:
+            #     if self.FLAG_BALL_TYPE['BROWN'] == True:
+            #         self.ball_user = 1
+            #     elif self.FLAG_BALL_TYPE['PRUPLE'] == True:
+            #         self.ball_user = 2  
+            #     my_uart.send_data()
+            #     self.state_trans(STATE['state_2_blue_climb'])
+            # else:
+            line_track(frame.copy(), err=1, type='grass', angle_limit=30)
+            my_uart.send_data()
             my_uart.clear_data()
 
         elif self.state == STATE['state_2_blue_climb']:
@@ -58,7 +58,7 @@ class State_Machine():
             else:
                 # light.pulse_width_percent(18)
 
-                line_track(frame.copy())
+                line_track(frame.copy(), err=1, type='grass', angle_limit=30)
                 my_uart.send_data()
             my_uart.clear_data()
         elif self.state == STATE['state_4_user']:
@@ -142,7 +142,6 @@ class State_Machine():
     
 
     def find_ball(self, img):
-        self.FLAG_BALL_TYPE = { 'PRUPLE': False, 'BROWN': False}
         self.FLAG_BALL_TYPE['PRUPLE'] = detect_ball(img, 'PRUPLE')
         self.FLAG_BALL_TYPE['BROWN'] = detect_ball(img, 'BROWN')
 

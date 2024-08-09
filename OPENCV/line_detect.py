@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-
+from uart import my_uart
 from utils import limit_angle
 from utils import LEFT, RIGHT, STRAIGHT
 
@@ -12,12 +12,27 @@ def calculate_slope(line):
     else:
         return (y1 - y2) / (x1 - x2)
 
-def calculate_angle(pt1, pt2):
+def calculate_angle_direct(pt1, pt2, err = 3):
     dx = pt1[0] - pt2[0]
     dy = pt1[1] - pt2[1]
+    minus = 0
+    if dy / dx < 0:
+        dy = abs(dy)
+        dx = abs(dx)
+        minus = 1
     angle_rad = math.atan2(dy, dx)
     angle_deg = math.degrees(angle_rad)
-    return angle_deg
+    if minus == 0:
+        if angle_deg < err:
+            direct = STRAIGHT
+        else:
+            direct = RIGHT
+    else:
+        if angle_deg < err:
+            direct = STRAIGHT
+        else:
+            direct = LEFT
+    return angle_deg ,direct
 
 def rm_abnormal_lines(lines, threshold = 0.2):
     slopes = [calculate_slope(line) for line in lines]
@@ -40,25 +55,9 @@ def least_squares_fit(lines):
     point_max = (np.max(x_coords), np.polyval(poly, np.max(x_coords)))
     return np.array([point_min, point_max], dtype=np.int32)
 
-def angle_deg_and_dir(angle, err = 20):
-    direct = STRAIGHT
-    angle_deg = 90
 
-    if angle > 90:
-        angle_deg = 180 - angle
-        if angle_deg < err:
-            direct = STRAIGHT
-        else:
-            direct = LEFT  # 靠左
-    elif angle < 90:
-        angle_deg = angle
-        if angle_deg < err:
-            direct = STRAIGHT
-        else:
-            direct = RIGHT  # 靠右
-    return direct, angle_deg
 
-def mid_line_detect(frame):
+def mid_line_detect(frame ,err):
 
     angle = 0
 
@@ -68,13 +67,6 @@ def mid_line_detect(frame):
 
     edge = cv2.Canny(img_bin, 0, 0)
     # cv2.imshow('edge', edge)
-
-    # w = edge.shape[1]
-    # h = edge.shape[0]
-    # src = np.float32([[200,415], [400, 313], [1000, 305],[1500, 415]])
-    # dst = np.float32([[0, 640], [0, 0], [1605, 0], [1605, 640]])
-    # M = cv2.getPerspectiveTransform(src, dst)
-    # pers = cv2.warpPerspective(edge, M, (1605, 640))
 
     mask = np.zeros_like(edge)
     # mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
@@ -118,33 +110,31 @@ def mid_line_detect(frame):
     cv2.line(frame, tuple(right_line_ret[0]), tuple(right_line_ret[1]), color=(0, 255,255), thickness = 5)
     cv2.line(frame, tuple(mid_lower), tuple(mid_upper), color=(0, 0,255), thickness = 5)
 
-    angle = calculate_angle(mid_upper, mid_lower)
+    angle, direct = calculate_angle_direct(mid_upper, mid_lower, err)
     mid_x = (mid_upper[0] + mid_lower[0]) / 2
-    return (angle, mid_x)
+    return (angle, mid_x, direct)
 
 def line_track(frame, err=1, type='default', angle_limit=20):
     
     direct = STRAIGHT
-    angle_deg = 0
+    angle = 90
     mid_x = 0
     w = frame.shape[1]
     h = frame.shape[0]
     offset_turn = 2         # TODO: need to be specified
-    offset_default = 5
-    angle, mid_x = mid_line_detect(frame)
+    offset_default = 0
+    angle, mid_x, direct = mid_line_detect(frame, err)
 
     if angle:
-        if type == 'grass' or 'turn':
-            direct, angle_deg = angle_deg_and_dir(angle, err = err)
         if type == 'grass':  # 直道修正
-            angle_err = w / 2 - mid_x
-            angle_deg = int(angle_deg + 1 * angle_err / 2)
-            limit_angle(angle_deg, angle_limit)  # 角度限幅
-            if angle_deg > 1:
-                if mid_x > w / 2:
-                    direct = RIGHT
-                elif mid_x < w / 2:
-                    direct = LEFT
+            angle_err = w / 2 - mid_x - offset_default
+            angle = int(angle + 1 * angle_err / 2)
+            limit_angle(angle, angle_limit)  
+            # if angle > 1:
+            #     if mid_x > w / 2:
+            #         direct = RIGHT
+            #     elif mid_x < w / 2:
+            #         direct = LEFT
                 #else:
                     #direct = STRAIGHT
 
@@ -152,23 +142,23 @@ def line_track(frame, err=1, type='default', angle_limit=20):
             if mid_x / 2 < (w/2 - offset_turn):  
                 direct = LEFT
                 angle_err = w/2 - mid_x
-                angle_deg = int((angle_deg + angle_err / 2))
-                limit_angle(angle_deg, angle_limit)
+                angle = int((angle + angle_err / 2))
+                limit_angle(angle, angle_limit)
                 direct = LEFT
-        else:
-            angle_err = w/2 - offset_default - mid_x
-            angle_deg = int(angle_deg + angle_err / 2)
-            limit_angle(angle_deg, angle_limit)  # 角度限幅
-            if angle_deg > 1:
-                if mid_x / 2 > w/2 - offset_default:
-                    direct = RIGHT
-                elif mid_x / 2 < w/2 - offset_default:
-                    direct = LEFT
+        # else:
+        #     angle_err = w/2 - offset_default - mid_x
+        #     angle = int(angle + angle_err / 2)
+        #     limit_angle(angle, angle_limit)  
+        #     if angle > 1:
+        #         if mid_x / 2 > w/2 - offset_default:
+        #             direct = RIGHT
+        #         elif mid_x / 2 < w/2 - offset_default:
+        #             direct = LEFT
 
-        # my_uart.set_data(direct, 'direction')
-        # my_uart.set_data(angle_deg, 'angle')
+        my_uart.set_data(direct, 'direction')
+        my_uart.set_data(angle, 'angle')
         print('direct', direct)
-        print('angle_deg', angle_deg)
+        print('angle_deg', angle)
         return True
     
     # my_uart.set_data(LEFT, 'direction')

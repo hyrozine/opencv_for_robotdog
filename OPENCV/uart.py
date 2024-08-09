@@ -8,7 +8,7 @@ class Uart:
         self.port = serial.Serial(self.port, self.baud, timeout = self.timeout)
         if not self.port.is_open:
             self.port.open()
-        self.datasets = {'header1': 100, 'header2': 8, 'color': 0, 'direction': 0, 'angle': 0, 'isOpen': 0, 'ball': 0, 'end': 101}
+        self.datasets = {'header1': 100, 'FLAG': 0, 'color': 0, 'direction': 0, 'angle': 0, 'isOpen': 0, 'ball': 0, 'end': 101}
 
     def port_close(self):
         if self.port.is_open:
@@ -34,7 +34,7 @@ class Uart:
         allData = []
         # for 遍历字典 append 顺序会乱
         allData.append(self.datasets['header1'])
-        allData.append(self.datasets['header2'])
+        allData.append(self.datasets['FLAG'])
         allData.append(self.datasets['color'])
         allData.append(self.datasets['direction'])
         allData.append(self.datasets['angle'])
