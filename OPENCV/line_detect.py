@@ -15,13 +15,10 @@ def calculate_slope(line):
 def calculate_angle(pt1, pt2):
     dx = pt1[0] - pt2[0]
     dy = pt1[1] - pt2[1]
-    if dx < 0 and dy < 0:
-        dx = -dx
-        dy = -dy
-    if dx > 0 and dy < 0:
-        dx = -dx
-        dy = -dy
-    angle_rad = math.atan2(dy, dx)
+    if dx == 0 or dy == 0:
+        return 90 ,STRAIGHT
+    slope = dy / dx
+    angle_rad = math.atan2(slope, 1)
     angle_deg = math.degrees(angle_rad)
     return angle_deg
 
