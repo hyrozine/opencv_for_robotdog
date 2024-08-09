@@ -87,12 +87,12 @@ def mid_line_detect(frame):
     #print(masked_edge.shape)
      
     lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 40, maxLineGap = 20)
-    print(lines)
+    # print(lines)
 
     if lines is not None:
         left_lines = [line for line in lines if calculate_slope(line) > 0]
         right_lines = [line for line in lines if calculate_slope(line) < 0]
-        print(len(left_lines) , len(right_lines))
+        # print(len(left_lines) , len(right_lines))
     else:
         return 0,0
     
