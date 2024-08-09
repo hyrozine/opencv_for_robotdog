@@ -18,7 +18,7 @@ def calculate_angle(pt1, pt2):
     if dx == 0 or dy == 0:
         return 90 ,STRAIGHT
     slope = dy / dx
-    angle_rad = math.atan2(slope, 1)
+    angle_rad = math.atan2(slope, 1.0)
     angle_deg = math.degrees(angle_rad)
     return angle_deg
 
