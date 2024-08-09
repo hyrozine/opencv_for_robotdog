@@ -5,7 +5,7 @@ import color_detect
 import ball_detect
 from line_detect import line_track
 
-video = cv2.VideoCapture(0, cv2.CAO_V4L2)
+video = cv2.VideoCapture(0, cv2.CAP_V4L2)
 video.set(cv2.CAP_PROP_FRAME_WIDTH, img_size[0])
 video.set(cv2.CAP_PROP_FRAME_HEIGHT, img_size[1])
 
