@@ -38,7 +38,7 @@ def least_squares_fit(lines):
     poly = np.polyfit(x_coords, y_coords, deg=2)
     point_min = (np.min(x_coords), np.polyval(poly, np.min(x_coords)))
     point_max = (np.max(x_coords), np.polyval(poly, np.max(x_coords)))
-    return np.array([point_min, point_max], dtype=np.int)
+    return np.array([point_min, point_max], dtype=np.int32)
 
 def angle_deg_and_dir(angle, err = 20):
     direct = STRAIGHT
