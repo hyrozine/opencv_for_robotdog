@@ -64,7 +64,7 @@ def mid_line_detect(frame):
     angle = 0
 
     img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    ret,img_bin = cv2.threshold(img_gray, 90, 255, cv2.THRESH_BINARY) 
+    ret,img_bin = cv2.threshold(img_gray, 120, 255, cv2.THRESH_BINARY) 
     # cv2.imshow('img_bin', img_bin)
 
     edge = cv2.Canny(img_bin, 0, 0)
