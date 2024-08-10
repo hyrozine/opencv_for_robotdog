@@ -15,7 +15,7 @@ if __name__ == '__main__':
                 break
             if ret == True:
                 state_machine.state_machine_exe(frame)
-                cv2.imshow('video',frame)
+                # cv2.imshow('video',frame)
                 key = cv2.waitKey(1)
                 if(key & 0xFF == ord('q')) :
                     break
