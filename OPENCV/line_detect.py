@@ -146,7 +146,7 @@ def line_track(frame, err=1, type='default', angle_limit=20):
         # if type == 'grass':  
         #     angle_err = w / 2 - mid_x
         #     angle_deg = int(angle_deg + 1 * angle_err / 2)
-        #     limit_angle(angle_deg, angle_limit)  #
+        limit_angle(angle_deg, angle_limit)  
         #     if angle_deg > 1:
         #         if mid_x > w / 2:
         #             direct = RIGHT
