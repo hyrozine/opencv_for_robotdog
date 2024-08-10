@@ -35,7 +35,7 @@ class State_Machine():
             #     my_uart.send_data()
             #     self.state_trans(STATE['state_2_blue_climb'])
             # else:
-            line_track(frame.copy(), err=1, type='grass', angle_limit=30)
+            line_track(frame.copy(), err=10, type='grass', angle_limit=30)
             my_uart.send_data()
             my_uart.clear_data()
 

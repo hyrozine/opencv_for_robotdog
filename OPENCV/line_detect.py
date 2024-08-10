@@ -44,20 +44,20 @@ def least_squares_fit(lines):
 
 def angle_deg_and_dir(angle, err = 20):
     direct = STRAIGHT
-    angle_deg = 90
+    angle_deg = 0
     if angle > 90:
-        angle_deg = 180 - angle
+        angle_deg = angle - 90
         if angle_deg < err:
             direct = STRAIGHT
         else:
             direct = LEFT  # 靠左
     elif angle < 90:
-        angle_deg = angle
+        angle_deg = 90 - angle
         if angle_deg < err:
             direct = STRAIGHT
         else:
             direct = RIGHT  # 靠右
-    return direct, angle_deg
+    return direct, int(angle_deg)
 
 def mid_line_detect(frame):
 
@@ -133,7 +133,7 @@ def mid_line_detect(frame):
 def line_track(frame, err=1, type='default', angle_limit=20):
     
     direct = STRAIGHT
-    angle_deg = 90
+    angle_deg = 0
     w = frame.shape[1]
     h = frame.shape[0]
     mid_x = w / 2
@@ -143,25 +143,25 @@ def line_track(frame, err=1, type='default', angle_limit=20):
 
     if angle:
         direct, angle_deg = angle_deg_and_dir(angle, err)
-        if type == 'grass':  
-            angle_err = w / 2 - mid_x
-            angle_deg = int(angle_deg + 1 * angle_err / 2)
-            limit_angle(angle_deg, angle_limit)  #
-            # if angle_deg > 1:
-            #     if mid_x > w / 2:
-            #         direct = RIGHT
-            #     elif mid_x < w / 2:
-            #         direct = LEFT
+        # if type == 'grass':  
+        #     angle_err = w / 2 - mid_x
+        #     angle_deg = int(angle_deg + 1 * angle_err / 2)
+        #     limit_angle(angle_deg, angle_limit)  #
+        #     if angle_deg > 1:
+        #         if mid_x > w / 2:
+        #             direct = RIGHT
+        #         elif mid_x < w / 2:
+        #             direct = LEFT
                 #else:
                     #direct = STRAIGHT
 
-        elif type == 'turn':  
-            if mid_x / 2 < (w/2 - offset_turn):  
-                direct = LEFT
-                angle_err = w/2 - mid_x
-                angle_deg = int((angle_deg + angle_err / 2))
-                limit_angle(angle_deg, angle_limit)
-                direct = LEFT
+        # elif type == 'turn':  
+        #     if mid_x / 2 < (w/2 - offset_turn):  
+        #         direct = LEFT
+        #         angle_err = w/2 - mid_x
+        #         angle_deg = int((angle_deg + angle_err / 2))
+        #         limit_angle(angle_deg, angle_limit)
+        #         direct = LEFT
         # else:
         #     angle_err = w/2 - offset_default - mid_x
         #     angle_deg = int(angle_deg + angle_err / 2)
