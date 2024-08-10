@@ -15,7 +15,7 @@ from uart import my_uart
 
 class State_Machine():
     def __init__(self):
-        self.state = STATE['state_1_recognize_ball']
+        self.state = STATE['state_1_init']
         #self.state = STATE['state_3_yellow_climb']
         self.ball_time = 0
         self.now_time = 0
@@ -26,7 +26,7 @@ class State_Machine():
     def state_machine_exe(self, frame):
         #print("now:",self.state)
 
-        if self.state == STATE['state_1_recognize_ball']:
+        if self.state == STATE['state_1_init']:
             # if self.find_ball(frame) is True:
             #     if self.FLAG_BALL_TYPE['BROWN'] == True:
             #         self.ball_user = 1
