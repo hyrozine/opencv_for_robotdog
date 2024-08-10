@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-from uart import my_uart
+# from uart import my_uart
 from utils import limit_angle
 from utils import LEFT, RIGHT, STRAIGHT
 
@@ -16,9 +16,8 @@ def calculate_angle(pt1, pt2):
     dx = pt1[0] - pt2[0]
     dy = pt1[1] - pt2[1]
     if dx == 0 or dy == 0:
-        return 90 ,STRAIGHT
-    slope = dy / dx
-    angle_rad = math.atan2(slope, 1.0)
+        return 90
+    angle_rad = math.atan2(dy, dx)
     angle_deg = math.degrees(angle_rad)
     return angle_deg
 
@@ -38,7 +37,7 @@ def rm_abnormal_lines(lines, threshold = 0.2):
 def least_squares_fit(lines):
     x_coords = np.ravel([[line[0][0], line[0][2]] for line in lines])
     y_coords = np.ravel([[line[0][1], line[0][3]] for line in lines])
-    poly = np.polyfit(x_coords, y_coords, deg=2)
+    poly = np.polyfit(x_coords, y_coords, deg=1)
     point_min = (np.min(x_coords), np.polyval(poly, np.min(x_coords)))
     point_max = (np.max(x_coords), np.polyval(poly, np.max(x_coords)))
     return np.array([point_min, point_max], dtype=np.int32)
@@ -46,7 +45,6 @@ def least_squares_fit(lines):
 def angle_deg_and_dir(angle, err = 20):
     direct = STRAIGHT
     angle_deg = 90
-
     if angle > 90:
         angle_deg = 180 - angle
         if angle_deg < err:
@@ -71,13 +69,6 @@ def mid_line_detect(frame):
 
     edge = cv2.Canny(img_bin, 0, 0)
     # cv2.imshow('edge', edge)
-
-    # w = edge.shape[1]
-    # h = edge.shape[0]
-    # src = np.float32([[200,415], [400, 313], [1000, 305],[1500, 415]])
-    # dst = np.float32([[0, 640], [0, 0], [1605, 0], [1605, 640]])
-    # M = cv2.getPerspectiveTransform(src, dst)
-    # pers = cv2.warpPerspective(edge, M, (1605, 640))
 
     mask = np.zeros_like(edge)
     # mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
@@ -113,9 +104,23 @@ def mid_line_detect(frame):
     else:
         return 0,0
     
-    mid_lower = (left_line_ret[0] + right_line_ret[1]) // 2
-    mid_upper = (left_line_ret[1] + right_line_ret[0]) // 2
-    # print(left_line_ret, right_line_ret, mid_max, mid_min)
+    if left_line_ret[0][1] >= left_line_ret[1][1]:
+        left_upper = left_line_ret[0]
+        left_lower = left_line_ret[1]
+    else:
+        left_upper = left_line_ret[1]
+        left_lower = left_line_ret[0]
+    if right_line_ret[0][1] >= right_line_ret[1][1]:
+        right_upper = right_line_ret[0]
+        right_lower = right_line_ret[1]
+    else:
+        right_upper = right_line_ret[1]
+        right_lower = right_line_ret[0]
+
+    mid_lower = (left_lower + right_lower) // 2
+    mid_upper = (left_upper + right_upper) // 2
+    # print(left_line_ret, right_line_ret)
+    # print(mid_lower ,mid_upper)
 
     cv2.line(frame, tuple(left_line_ret[0]), tuple(left_line_ret[1]), color=(0, 255,255), thickness = 5)
     cv2.line(frame, tuple(right_line_ret[0]), tuple(right_line_ret[1]), color=(0, 255,255), thickness = 5)
@@ -128,10 +133,10 @@ def mid_line_detect(frame):
 def line_track(frame, err=1, type='default', angle_limit=20):
     
     direct = STRAIGHT
-    angle_deg = 0
-    mid_x = 0
+    angle_deg = 90
     w = frame.shape[1]
     h = frame.shape[0]
+    mid_x = w / 2
     offset_turn = 2         # TODO: need to be specified
     offset_default = 0
     angle, mid_x = mid_line_detect(frame)
@@ -167,12 +172,12 @@ def line_track(frame, err=1, type='default', angle_limit=20):
         #         elif mid_x / 2 < w/2 - offset_default:
         #             direct = LEFT
 
-        my_uart.set_data(direct, 'direction')
-        my_uart.set_data(angle_deg, 'angle')
+        # my_uart.set_data(direct, 'direction')
+        # my_uart.set_data(angle_deg, 'angle')
         print('direct', direct)
         print('angle_deg', angle_deg)
         return True
     
-    my_uart.set_data(LEFT, 'direction')
-    my_uart.set_data(45, 'angle')
+    # my_uart.set_data(LEFT, 'direction')
+    # my_uart.set_data(45, 'angle')
     return False
