@@ -44,9 +44,9 @@ def least_squares_fit(lines):
 def judge_curve(left_lower, left_upper, right_lower, right_upper):
     curve_flag = 0
     if calculate_slope(left_lower, left_upper) > 0 and calculate_slope(right_lower, right_upper) > 0:
-        curve_flag++
+        curve_flag += 1
     if right_lower == [] or right_upper == []:
-        curve_flag++
+        curve_flag += 1
     if curve_flag == 2:
         return True
     else:
