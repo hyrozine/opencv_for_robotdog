@@ -101,7 +101,7 @@ def mid_line_detect(frame):
     mask = np.zeros_like(edge)
     # mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
     #mask = cv2.fillPoly(mask, np.array([[[0,mask.shape[0] // 4 * 3], [0, mask.shape[0] // 2], [1280, mask.shape[0] // 2], [1280, mask.shape[0] // 4 * 3]]]), color = 255)   # TODO: need to be specified
-    mask = cv2.fillPoly(mask, np.array([[[mask.shape[1] // 5, mask.shape[0] // 2], [mask.shape[1] // 5, mask.shape[0] // 4, [mask.shape[1] // 5 * 4, mask.shape[0] // 4], [mask.shape[1] // 5 * 4, mask.shape[0] // 2 ]]]), color = 255)   # TODO: need to be specified
+    mask = cv2.fillPoly(mask, np.array([[[mask.shape[1] // 5, mask.shape[0] // 2], [mask.shape[1] // 5, mask.shape[0] // 4], [mask.shape[1] // 5 * 4, mask.shape[0] // 4], [mask.shape[1] // 5 * 4, mask.shape[0] // 2 ]]]), color = 255)   # TODO: need to be specified
     # cv2.imshow('mask', mask)
 
     # print(mask.shape[0] // 3)
