@@ -1,4 +1,6 @@
 img_size = (1280, 720)
+offset = 5
+offset_turn = 100
 
 COLOR_THRESHOLD = {
     'BLUE': [102, 179, 102, 204, 98, 212],  
