@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-# from uart import my_uart
+from uart import my_uart
 from utils import limit_angle, LEFT, RIGHT, STRAIGHT, img_size, offset_turn, offset
 
 def calculate_slope(line):
