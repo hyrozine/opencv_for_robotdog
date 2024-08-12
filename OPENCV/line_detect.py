@@ -10,6 +10,14 @@ def calculate_slope(line):
     else:
         return (y1 - y2) / (x1 - x2)
 
+def calculate_slope_point(pt1, pt2):
+    dx = pt1[0] - pt1[0]
+    dy = pt2[1] - pt2[1]
+    if dx == 0:
+        return 0
+    else:
+        return dy / dx
+
 def calculate_angle(pt1, pt2):
     dx = pt1[0] - pt2[0]
     dy = pt1[1] - pt2[1]
@@ -49,11 +57,11 @@ def distinguish_line(lines):
             else:
                 right_lines.append(line)
         # while mean_x > img_size[0], it's still possible on the left because of deviation
-        for line in right_lines:
+        for i, line in enumerate(right_lines):
             x1, y1, x2, y2 = line[0]
             if x1 <= img_size[0] / 2 or x2 <= img_size[0] / 2:
                 left_lines.append(line)
-                right_lines.remove(line)
+                right_lines.pop(i)
     elif negative_slope == []:
         for line in positive_slope:
             x1, y1, x2, y2 = line[0]
@@ -62,11 +70,11 @@ def distinguish_line(lines):
                 left_lines.append(line)
             else:
                 right_lines.append(line)
-        for line in left_lines:
+        for i, line in enumerate(left_lines):
             x1, y1, x2, y2 = line[0]
             if x1 > img_size[0] / 2 or x2 > img_size[0] / 2:
                 right_lines.append(line)
-                left_lines.remove(line)
+                left_lines.pop(i)
     return left_lines, right_lines
 
 
@@ -81,17 +89,17 @@ def least_squares_fit(lines):
 
 def judge(left_lower, left_upper, right_lower, right_upper):
     lane_flag = 0
-    if calculate_slope(left_lower, left_upper) >= 0 and calculate_slope(right_lower, right_upper) <= 0:
-        lane_flag = 0
-        return lane_flag
-    if calculate_slope(left_lower, left_upper) >= 0 and calculate_slope(right_lower, right_upper) >= 0:
-        lane_flag = 1
-        return lane_flag
     if right_lower == [] or right_upper == []:
         lane_flag = 2
         return lane_flag
     if left_lower == [] or left_upper == []:
         lane_flag = 4
+        return lane_flag
+    if calculate_slope_point(left_lower, left_upper) >= 0 and calculate_slope_point(right_lower, right_upper) <= 0:
+        lane_flag = 0
+        return lane_flag
+    if calculate_slope_point(left_lower, left_upper) >= 0 and calculate_slope_point(right_lower, right_upper) >= 0:
+        lane_flag = 1
         return lane_flag
 
 def straight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag):
@@ -169,6 +177,10 @@ def mid_line_detect(frame, lane_flag):
     right_lines_mod = []
     left_line_ret = []
     right_line_ret = []
+    left_lower = []
+    left_upper = []
+    right_lower = []
+    right_upper = []
 
     img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     ret,img_bin = cv2.threshold(img_gray, 110, 255, cv2.THRESH_BINARY) 
@@ -212,29 +224,35 @@ def mid_line_detect(frame, lane_flag):
     # use least squares fit to get two lines
     if left_lines_mod != []: 
         left_line_ret = least_squares_fit(left_lines_mod)
+        print(left_line_ret)
     if right_lines_mod != []:
         right_line_ret = least_squares_fit(right_lines_mod)
+        print(right_line_ret)
     if left_lines_mod == [] and right_lines_mod == []:
         return 0, img_size[0]/2, 2
     
     # distinguish the upper points and lower points
-    if left_line_ret[0][1] >= left_line_ret[1][1]:
-        left_upper = left_line_ret[0]
-        left_lower = left_line_ret[1]
-    else:
-        left_upper = left_line_ret[1]
-        left_lower = left_line_ret[0]
-    if right_line_ret[0][1] >= right_line_ret[1][1]:
-        right_upper = right_line_ret[0]
-        right_lower = right_line_ret[1]
-    else:
-        right_upper = right_line_ret[1]
-        right_lower = right_line_ret[0]
+    if left_line_ret != []:
+        if left_line_ret[0][1] >= left_line_ret[1][1]:
+            left_upper = left_line_ret[0]
+            left_lower = left_line_ret[1]
+        else:
+            left_upper = left_line_ret[1]
+            left_lower = left_line_ret[0]
+        print(left_upper, left_lower)
+    if right_line_ret != []:
+        if right_line_ret[0][1] >= right_line_ret[1][1]:
+            right_upper = right_line_ret[0]
+            right_lower = right_line_ret[1]
+        else:
+            right_upper = right_line_ret[1]
+            right_lower = right_line_ret[0]
+        print(right_upper, right_lower)
    
-   # straight
+    # straight
     if lane_flag == 0: 
         lane_flag = judge(left_lower, left_upper, right_lower, right_upper)
-        angle, mid_x = staight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag)
+        angle, mid_x = straight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag)
         return angle, mid_x, lane_flag
     # close to curve
     elif lane_flag == 1:
