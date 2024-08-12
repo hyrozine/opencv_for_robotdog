@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 import math
-from uart import my_uart
-import utils
+#from uart import my_uart
+from utils import STRAIGHT, LEFT, RIGHT, limit_angle, img_size, offset_turn_right, offset_turn_left
 def calculate_slope(line):
     x1, y1, x2, y2 = line[0]
     if x1 - x2 == 0:
@@ -36,8 +36,8 @@ def distinguish_line(lines):
     left_lines = []
     right_lines = []
     # distinguish the lines depends on slope first
-    positive_slope = [line for line in lines if calculate_angle(line) < 0]
-    negative_slope = [line for line in lines if calculate_angle(line) > 0]
+    positive_slope = [line for line in lines if calculate_slope(line) > 0]
+    negative_slope = [line for line in lines if calculate_slope(line) < 0]
     # if lose line or close to curve and the lines slope are all negative or positive
     if positive_slope == []:
         # distinguish by image width
@@ -45,28 +45,28 @@ def distinguish_line(lines):
             x1, y1, x2, y2 = line[0]
             mean_x = (x1 + x2) / 2
             if mean_x <= img_size[0]:
-                left_lines.append[line]
+                left_lines.append(line)
             else:
-                right_lines.append[line]
+                right_lines.append(line)
         # while mean_x > img_size[0], it's still possible on the left because of deviation
         for line in right_lines:
             x1, y1, x2, y2 = line[0]
             if x1 <= img_size[0] / 2 or x2 <= img_size[0] / 2:
-                left_lines.append[line]
-                right_lines.remove[line]
+                left_lines.append(line)
+                right_lines.remove(line)
     elif negative_slope == []:
         for line in positive_slope:
             x1, y1, x2, y2 = line[0]
             mean_x = (x1 + x2) / 2
             if mean_x < img_size[0]:
-                left_lines.append[line]
+                left_lines.append(line)
             else:
-                right_lines.append[line]
+                right_lines.append(line)
         for line in left_lines:
             x1, y1, x2, y2 = line[0]
             if x1 > img_size[0] / 2 or x2 > img_size[0] / 2:
-                right_lines.append[line]
-                left_lines.remove[line]
+                right_lines.append(line)
+                left_lines.remove(line)
     return left_lines, right_lines
 
 
@@ -90,7 +90,7 @@ def judge(left_lower, left_upper, right_lower, right_upper):
     if right_lower == [] or right_upper == []:
         lane_flag = 2
         return lane_flag
-    if left_lower == [] or left_upper = []:
+    if left_lower == [] or left_upper == []:
         lane_flag = 4
         return lane_flag
 
@@ -105,6 +105,7 @@ def straight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag):
         draw_line(left_lower, left_upper, right_lower, right_upper)
 
         return angle, mid_x
+    # close to the curve, walk straight till lose the line
     if lane_flag == 2:
         mid_lower = (left_lower + right_lower) // 2
         mid_upper = (left_upper + right_upper) // 2
@@ -120,13 +121,15 @@ def curve_walk(lower, upper, lane_flag):
     mid_lower = []
     mid_upper[1] = upper[1]
     mid_lower[1] = lower[1]
-    if lane_flag = 2:
+
+    # if lose the line, provide a line
+    if lane_flag == 2:
         mid_upper[0] = (lower[0] + img_size[0]) / 2 + offset_turn_right
         mid_lower[0] = (upper[0] + img_size[0]) / 2 + offset_turn_right
 
         draw_line(lower, upper, [img_size[0], lower[1]], [img_size[0], upper[1]], mid_upper, mid_lower)
 
-    if lane_flag = 4:
+    if lane_flag == 4:
         mid_upper[0] = lower[0] / 2 - offset_turn_left 
         mid_lower[0] = upper[0] / 2 - offset_turn_left
 
@@ -144,13 +147,13 @@ def angle_deg_and_dir(angle, err = 20):
         if angle_deg < err:
             direct = STRAIGHT
         else:
-            direct = LEFT  # 靠左
+            direct = LEFT  
     elif angle < 90:
         angle_deg = 90 - angle
         if angle_deg < err:
             direct = STRAIGHT
         else:
-            direct = RIGHT  # 靠右
+            direct = RIGHT 
     return direct, int(angle_deg)
 
 def draw_lines(frame, left_upper, left_lower, right_upper, right_lower, mid_lower, mid_upper):
@@ -162,6 +165,10 @@ def mid_line_detect(frame, lane_flag):
 
     angle = 0
     mid_x = img_size[0] / 2
+    left_lines_mod = []
+    right_lines_mod = []
+    left_line_ret = []
+    right_line_ret = []
 
     img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     ret,img_bin = cv2.threshold(img_gray, 110, 255, cv2.THRESH_BINARY) 
@@ -186,8 +193,9 @@ def mid_line_detect(frame, lane_flag):
     
     # distinguish the left lines and the right lines
     if lines is not None:
+        #print(lines)
         left_lines, right_lines = distinguish_line(lines)
-        # print(len(left_lines) , len(right_lines))
+        #print(left_lines, right_lines)
     else:
         return 0, img_size[0]/2, 0
     
@@ -199,7 +207,7 @@ def mid_line_detect(frame, lane_flag):
         # print(len(left_lines_mod) + len(right_lines_mod))
         # print(left_lines_mod + right_lines_mod)
     if left_lines == [] and right_lines == []:
-        return 0, img_size[0]/2, 0
+        return 0, img_size[0]/2, 2
     
     # use least squares fit to get two lines
     if left_lines_mod != []: 
@@ -207,7 +215,7 @@ def mid_line_detect(frame, lane_flag):
     if right_lines_mod != []:
         right_line_ret = least_squares_fit(right_lines_mod)
     if left_lines_mod == [] and right_lines_mod == []:
-        return 0, img_size[0]/2, 0
+        return 0, img_size[0]/2, 2
     
     # distinguish the upper points and lower points
     if left_line_ret[0][1] >= left_line_ret[1][1]:
@@ -224,7 +232,7 @@ def mid_line_detect(frame, lane_flag):
         right_lower = right_line_ret[0]
    
    # straight
-   if lane_flag == 0: 
+    if lane_flag == 0: 
         lane_flag = judge(left_lower, left_upper, right_lower, right_upper)
         angle, mid_x = staight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag)
         return angle, mid_x, lane_flag
@@ -249,7 +257,7 @@ def mid_line_detect(frame, lane_flag):
         angle, mid_x = curve_walk(left_lower, left_upper, right_lower, right_upper, lane_flag)
         return angle, mid_x, lane_flag
 
-def line_track(frame, err=1, type='default', angle_limit=20, lane_flag):
+def line_track(frame, lane_flag, err=1, angle_limit=20):
     
     direct = STRAIGHT
     angle_deg = 0
@@ -288,8 +296,8 @@ def line_track(frame, err=1, type='default', angle_limit=20, lane_flag):
     #         elif mid_x / 2 < w/2 - offset_default:
     #             direct = LEFT
 
-    my_uart.set_data(direct, 'direction')
-    my_uart.set_data(angle_deg, 'angle')
+    #my_uart.set_data(direct, 'direction')
+    #my_uart.set_data(angle_deg, 'angle')
     print('direct', direct)
     print('angle_deg', angle_deg)
     return lane_flag

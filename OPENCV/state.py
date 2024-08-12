@@ -36,7 +36,7 @@ class State_Machine():
             #     my_uart.send_data()
             #     self.state_trans(STATE['state_2_blue_climb'])
             # else:
-            self.lane_flag = line_track(frame, err=10, angle_limit=30, self.lane_flag)
+            self.lane_flag = line_track(frame, self.lane_flag, err=10, angle_limit=30)
             my_uart.send_data()
             my_uart.clear_data()
 
