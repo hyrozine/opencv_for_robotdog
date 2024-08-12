@@ -32,6 +32,44 @@ def rm_abnormal_lines(lines, threshold = 0.2):
             break
     return lines 
 
+def distinguish_line(lines):
+    left_lines = []
+    right_lines = []
+    # distinguish the lines depends on slope first
+    positive_slope = [line for line in lines if calculate_angle(line) < 0]
+    negative_slope = [line for line in lines if calculate_angle(line) > 0]
+    # if lose line or close to curve and the lines slope are all negative or positive
+    if positive_slope == []:
+        # distinguish by image width
+        for line in negative_slope:
+            x1, y1, x2, y2 = line[0]
+            mean_x = (x1 + x2) / 2
+            if mean_x <= img_size[0]:
+                left_lines.append[line]
+            else:
+                right_lines.append[line]
+        # while mean_x > img_size[0], it's still possible on the left because of deviation
+        for line in right_lines:
+            x1, y1, x2, y2 = line[0]
+            if x1 <= img_size[0] / 2 or x2 <= img_size[0] / 2:
+                left_lines.append[line]
+                right_lines.remove[line]
+    elif negative_slope == []:
+        for line in positive_slope:
+            x1, y1, x2, y2 = line[0]
+            mean_x = (x1 + x2) / 2
+            if mean_x < img_size[0]:
+                left_lines.append[line]
+            else:
+                right_lines.append[line]
+        for line in left_lines:
+            x1, y1, x2, y2 = line[0]
+            if x1 > img_size[0] / 2 or x2 > img_size[0] / 2:
+                right_lines.append[line]
+                left_lines.remove[line]
+    return left_lines, right_lines
+
+
 def least_squares_fit(lines):
     x_coords = np.ravel([[line[0][0], line[0][2]] for line in lines])
     y_coords = np.ravel([[line[0][1], line[0][3]] for line in lines])
@@ -78,8 +116,8 @@ def straight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag):
         return angle, mid_x
 
 def curve_walk(lower, upper, lane_flag):
-    mid_upper = [0, 0]
-    mid_lower = [0, 0]
+    mid_upper = []
+    mid_lower = []
     mid_upper[1] = upper[1]
     mid_lower[1] = lower[1]
     if lane_flag = 2:
@@ -146,10 +184,9 @@ def mid_line_detect(frame, lane_flag):
     lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 40, maxLineGap = 20)
     # print(lines)
     
-    # figure out the left lines and the right lines
+    # distinguish the left lines and the right lines
     if lines is not None:
-        left_lines = [line for line in lines if calculate_slope(line) > 0]
-        right_lines = [line for line in lines if calculate_slope(line) < 0]
+        left_lines, right_lines = distinguish_line(lines)
         # print(len(left_lines) , len(right_lines))
     else:
         return 0, img_size[0]/2, 0
@@ -172,7 +209,7 @@ def mid_line_detect(frame, lane_flag):
     if left_lines_mod == [] and right_lines_mod == []:
         return 0, img_size[0]/2, 0
     
-    # figure out the upper points and lower points
+    # distinguish the upper points and lower points
     if left_line_ret[0][1] >= left_line_ret[1][1]:
         left_upper = left_line_ret[0]
         left_lower = left_line_ret[1]
