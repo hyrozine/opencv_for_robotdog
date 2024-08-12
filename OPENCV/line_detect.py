@@ -63,10 +63,19 @@ def straight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag):
         # print(mid_lower, mid_upper)
         angle = calculate_angle(mid_upper, mid_lower)
         mid_x = (mid_upper[0] + mid_lower[0]) // 2
-        draw_line(left_lower, left_upper, right_lower, right_uppe)
+
+        draw_line(left_lower, left_upper, right_lower, right_upper)
+
         return angle, mid_x
     if lane_flag == 2:
-        
+        mid_lower = (left_lower + right_lower) // 2
+        mid_upper = (left_upper + right_upper) // 2
+        angle = 0
+        mid_x = (mid_upper[0] + mid_lower[0]) // 2
+
+        draw_line(left_lower, left_upper, right_lower, right_upper)
+
+        return angle, mid_x
 
 def curve_walk(lower, upper, lane_flag):
     mid_upper = [0, 0]
@@ -76,11 +85,15 @@ def curve_walk(lower, upper, lane_flag):
     if lane_flag = 2:
         mid_upper[0] = (lower[0] + img_size[0]) / 2 + offset_turn_right
         mid_lower[0] = (upper[0] + img_size[0]) / 2 + offset_turn_right
+
         draw_line(lower, upper, [img_size[0], lower[1]], [img_size[0], upper[1]], mid_upper, mid_lower)
+
     if lane_flag = 4:
         mid_upper[0] = lower[0] / 2 - offset_turn_left 
         mid_lower[0] = upper[0] / 2 - offset_turn_left
+
         draw_line(lower, upper, [0, lower[1]], [0, upper[1]], mid_upper, mid_lower)
+
     angle = calculate_angle(lower, upper)
     mid_x = (mid_lower[0] +mid_upper[0]) // 2
     return angle, mid_x
@@ -193,6 +206,7 @@ def mid_line_detect(frame, lane_flag):
         lane_flag = judge(left_lower, left_upper, right_lower, right_upper)
         angle, mid_x = curve_walk(left_lower, left_upper, right_lower, right_upper, lane_flag)
         return angle, mid_x, lane_flag
+    # lose left line
     elif lane_flag == 4:
         lane_flag = judge(left_lower, left_upper, right_lower, right_upper)
         angle, mid_x = curve_walk(left_lower, left_upper, right_lower, right_upper, lane_flag)
