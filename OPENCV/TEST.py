@@ -21,7 +21,7 @@ while video.isOpened():
             # _ = color_detect.detect_user(frame, 1)    # brown user
             # _ = color_detect.detect_user(frame, 2)    # purple user
             # _ = color_detect.detect_orange_end(frame)
-            track_flag = line_track(frame, 0)
+            track_flag = line_track(frame)
             #cv2.imshow('video',frame)
             key = cv2.waitKey(1)
             if(key & 0xFF == ord('q')) :
