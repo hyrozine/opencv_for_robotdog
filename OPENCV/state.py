@@ -22,6 +22,7 @@ class State_Machine():
         self.blue_time = 0
         self.ball_user = 0
         self.FLAG_BALL_TYPE = { 'PRUPLE': False, 'BROWN': False}
+        self.lane_flag = 0
 
     def state_machine_exe(self, frame):
         #print("now:",self.state)
@@ -35,7 +36,7 @@ class State_Machine():
             #     my_uart.send_data()
             #     self.state_trans(STATE['state_2_blue_climb'])
             # else:
-            line_track(frame.copy(), err=10, type='grass', angle_limit=30)
+            self.lane_flag = line_track(frame.copy(), err=10, type='grass', angle_limit=30, self.lane_flag)
             my_uart.send_data()
             my_uart.clear_data()
 
