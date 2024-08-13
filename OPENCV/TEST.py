@@ -5,7 +5,7 @@ import color_detect
 import ball_detect
 from line_detect import line_track
 
-video = cv2.VideoCapture(0, cv2.CAP_V4L2)
+video = cv2.VideoCapture(2, cv2.CAP_V4L2)
 video.set(cv2.CAP_PROP_FRAME_WIDTH, img_size[0])
 video.set(cv2.CAP_PROP_FRAME_HEIGHT, img_size[1])
 video.set(6, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
@@ -22,7 +22,7 @@ while video.isOpened():
             # _ = color_detect.detect_user(frame, 2)    # purple user
             # _ = color_detect.detect_orange_end(frame)
             track_flag = line_track(frame)
-            #cv2.imshow('video',frame)
+            cv2.imshow('video',frame)
             key = cv2.waitKey(1)
             if(key & 0xFF == ord('q')) :
                 break

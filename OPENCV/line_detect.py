@@ -48,7 +48,10 @@ def distinguish_line(lines):
     # distinguish the lines depends on slope first
     positive_slope = [line for line in lines if calculate_slope(line) > 0]
     negative_slope = [line for line in lines if calculate_slope(line) < 0]
-    # if lose line or close to curve and the lines slope are all negative or positive
+    #print('positive_slope', positive_slope)
+    #print('negative_slope', negative_slope)
+    '''
+    # if lose line 
     if positive_slope == []:
         # distinguish by image width
         for line in negative_slope:
@@ -65,6 +68,7 @@ def distinguish_line(lines):
                 left_lines.append(line)
                 right_lines.pop(i)
     elif negative_slope == []:
+        
         for line in positive_slope:
             x1, y1, x2, y2 = line[0]
             mean_x = (x1 + x2) / 2
@@ -77,9 +81,13 @@ def distinguish_line(lines):
             if x1 > img_size[0] / 2 or x2 > img_size[0] / 2:
                 right_lines.append(line)
                 left_lines.pop(i)
+        
+        return [], positive_slope
     elif positive_slope != [] and negative_slope != []:
         return negative_slope, positive_slope 
-    return left_lines, right_lines
+    '''
+    #print(left_lines, right_lines)
+    return negative_slope, positive_slope
 
 
 def least_squares_fit(lines):
@@ -94,52 +102,36 @@ def least_squares_fit(lines):
 def judge(left_lower, left_upper, right_lower, right_upper):
     lane_flag = 0
     if right_lower == [] or right_upper == []:
-        lane_flag = 2
-        return lane_flag
-    if left_lower == [] or left_upper == []:
-        lane_flag = 4
-        return lane_flag
-    if calculate_slope_point(left_lower, left_upper) >= 0 and calculate_slope_point(right_lower, right_upper) <= 0:
-        lane_flag = 0
-        return lane_flag
-    if calculate_slope_point(left_lower, left_upper) >= 0 and calculate_slope_point(right_lower, right_upper) >= 0:
         lane_flag = 1
-        return lane_flag
+    if left_lower == [] or left_upper == []:
+        lane_flag = 2
+    if left_lower != [] and left_upper != [] and right_lower != [] and right_upper != []:
+        lane_flag = 0
+    return lane_flag
 
-def straight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag, frame):
-    if lane_flag == 0:
-        mid_lower = (left_lower + right_lower) // 2
-        mid_upper = (left_upper + right_upper) // 2
-        print(mid_lower, mid_upper)
-        angle = calculate_angle(mid_upper, mid_lower)
-        mid_x = (mid_upper[0] + mid_lower[0]) // 2
+def straight_walk(left_lower, left_upper, right_lower, right_upper, frame):
+    mid_lower = (left_lower + right_lower) // 2
+    mid_upper = (left_upper + right_upper) // 2
+    #print(mid_lower, mid_upper)
+    angle = calculate_angle(mid_upper, mid_lower)
+    mid_x = (mid_upper[0] + mid_lower[0]) // 2
 
-        draw_lines(frame, left_lower, left_upper, right_lower, right_upper, mid_lower, mid_upper)
+    draw_lines(frame, left_lower, left_upper, right_lower, right_upper, mid_lower, mid_upper)
 
-        return angle, mid_x
-    # close to the curve, walk straight till lose the line
-    if lane_flag == 1:
-        mid_lower = (left_lower + right_lower) // 2
-        mid_upper = (left_upper + right_upper) // 2
-        angle = 0
-        mid_x = (mid_upper[0] + mid_lower[0]) // 2
+    return angle, mid_x
 
-        draw_lines(frame, left_lower, left_upper, right_lower, right_upper, mid_lower, mid_upper)  
-
-        return angle, mid_x
-
-def curve_walk(lower, upper, lane_flag, frame):
+def lose_line_walk(lower, upper, lane_flag, frame):
     mid_upper = lower
     mid_lower = upper
 
     # if lose the line, provide a line
-    if lane_flag == 2:
+    if lane_flag == 1:
         mid_upper[0] = (lower[0] + img_size[0]) // 2 + offset_turn_right
         mid_lower[0] = (upper[0] + img_size[0]) // 2 + offset_turn_right
 
         draw_lines(frame, lower, upper, [img_size[0], lower[1]], [img_size[0], upper[1]], mid_upper, mid_lower)
 
-    if lane_flag == 4:
+    if lane_flag == 2:
         mid_upper[0] = lower[0] // 2 - offset_turn_left 
         mid_lower[0] = upper[0] // 2 - offset_turn_left
 
@@ -196,24 +188,24 @@ def mid_line_detect(frame):
     mask = np.zeros_like(edge)
     # mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
     #mask = cv2.fillPoly(mask, np.array([[[0,mask.shape[0] // 4 * 3], [0, mask.shape[0] // 2], [1280, mask.shape[0] // 2], [1280, mask.shape[0] // 4 * 3]]]), color = 255)   # TODO: need to be specified
-    mask = cv2.fillPoly(mask, np.array([[[mask.shape[1] // 5, mask.shape[0] // 2], [mask.shape[1] // 5, mask.shape[0] // 4], [mask.shape[1] // 5 * 4, mask.shape[0] // 4], [mask.shape[1] // 5 * 4, mask.shape[0] // 2 ]]]), color = 255)   # TODO: need to be specified
-    # cv2.imshow('mask', mask)
+    mask = cv2.fillPoly(mask, np.array([[[0, mask.shape[0] // 3], [0, mask.shape[0] // 3 - 50], [1280, mask.shape[0] // 3 - 50], [1280, mask.shape[0] // 3 ]]]), color = 255)   # TODO: need to be specified
+    #cv2.imshow('mask', mask)
 
     # print(mask.shape[0] // 3)
     masked_edge = cv2.bitwise_and(edge, mask)
-    # cv2.imshow('mask_edge', masked_edge)
+    #cv2.imshow('mask_edge', masked_edge)
     #print(masked_edge.shape)
      
      
-    lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 40, maxLineGap = 20)
+    lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 10, maxLineGap = 20)
     # print(lines)
     
     # distinguish the left lines and the right lines
     if lines is not None:
         #print(lines)
         left_lines, right_lines = distinguish_line(lines)
-        print('left_lines', left_lines)
-        print('right_lines', right_lines)
+        #print('left_lines', left_lines)
+        #print('right_lines', right_lines)
     else:
         return 0, img_size[0]/2, 0
     
@@ -245,8 +237,8 @@ def mid_line_detect(frame):
         else:
             left_upper = left_line_ret[1]
             left_lower = left_line_ret[0]
-        print('left_upper', left_upper)
-        print('left_lower', left_lower)
+        #print('left_upper', left_upper)
+        #print('left_lower', left_lower)
     if right_line_ret != []:
         if right_line_ret[0][1] >= right_line_ret[1][1]:
             right_upper = right_line_ret[0]
@@ -254,28 +246,25 @@ def mid_line_detect(frame):
         else:
             right_upper = right_line_ret[1]
             right_lower = right_line_ret[0]
-        print('right_upper', right_upper)
-        print('right_lower', right_lower)
+        #print('right_upper', right_upper)
+        #print('right_lower', right_lower)
    
     lane_flag = judge(left_lower, left_upper, right_lower, right_upper)
-    # straight or close to curve
-    if lane_flag == 0 or lane_flag == 1: 
-        angle, mid_x = straight_walk(left_lower, left_upper, right_lower, right_upper, lane_flag, frame)
+    print(lane_flag)
+    # straight
+    if lane_flag == 0: 
+        angle, mid_x = straight_walk(left_lower, left_upper, right_lower, right_upper, frame)
         return angle, mid_x, lane_flag
-    # in the curve 
-    elif lane_flag == 2:
-        angle, mid_x = curve_walk(left_lower, left_upper, lane_flag, frame)
-        return angle, mid_x, lane_flag
-    # fork
-    elif lane_flag == 3:
-        angle, mid_x = fork_walk(left_lower, left_upper, right_lower, right_upper, lane_flag, frame)
+    # lose right lines 
+    elif lane_flag == 1:
+        angle, mid_x = lose_line_walk(left_lower, left_upper, lane_flag, frame)
         return angle, mid_x, lane_flag
     # lose left lines
-    elif lane_flag == 4:
-        angle, mid_x = curve_walk(right_lower, right_upper, lane_flag, frame)
+    elif lane_flag == 2:
+        angle, mid_x = lose_line_walk(right_lower, right_upper, lane_flag, frame)
         return angle, mid_x, lane_flag
 
-def line_track(frame, err=1, angle_limit=20):
+def line_track(frame, err= 6, angle_limit = 10):
     
     direct = STRAIGHT
     angle_deg = 0
