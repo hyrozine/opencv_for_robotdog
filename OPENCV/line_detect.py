@@ -43,6 +43,8 @@ def rm_abnormal_lines(lines, threshold = 0.2):
 def distinguish_line(lines):
     left_lines = []
     right_lines = []
+    positive_slope = []
+    negative_slope = []
     # distinguish the lines depends on slope first
     positive_slope = [line for line in lines if calculate_slope(line) > 0]
     negative_slope = [line for line in lines if calculate_slope(line) < 0]
@@ -75,6 +77,8 @@ def distinguish_line(lines):
             if x1 > img_size[0] / 2 or x2 > img_size[0] / 2:
                 right_lines.append(line)
                 left_lines.pop(i)
+    elif positive_slope != [] and negative_slope != []:
+        return negative_slope, positive_slope 
     return left_lines, right_lines
 
 
