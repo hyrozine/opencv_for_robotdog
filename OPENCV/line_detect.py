@@ -144,22 +144,23 @@ def lose_line_walk(lower, upper, lane_flag, frame):
 def fork_walk(left_lower, left_upper, right_lower, right_upper, lane_flag, frame):
     pass
 
-def angle_deg_and_dir(angle, err = 20):
+def angle_and_direction(angle, err = 10):
     direct = STRAIGHT
-    angle_deg = 0
+    angle_ret = 0
     if angle > 90:
-        angle_deg = angle - 90
-        if angle_deg < err:
+        angle_ret = angle - 90
+        print('angle>90')
+        if angle_ret < err:
             direct = STRAIGHT
         else:
             direct = LEFT
     elif angle < 90:
-        angle_deg = 90 - angle
-        if angle_deg < err:
+        angle_ret = 90 - angle
+        if angle_ret < err:
             direct = STRAIGHT
         else:
             direct = RIGHT
-    return direct, int(angle_deg)
+    return direct, int (angle_ret)
 
 def draw_lines(frame, left_upper, left_lower, right_upper, right_lower, mid_lower, mid_upper):
     cv2.line(frame, tuple(left_upper), tuple(left_lower), color=(0, 255,255), thickness = 5)
@@ -264,25 +265,24 @@ def mid_line_detect(frame):
         angle, mid_x = lose_line_walk(right_lower, right_upper, lane_flag, frame)
         return angle, mid_x, lane_flag
 
-def line_track(frame, err= 6, angle_limit = 10):
+def line_track(frame, err= 5, angle_limit = 10):
     
     direct = STRAIGHT
-    angle_deg = 0
-    w = frame.shape[1]
-    h = frame.shape[0]
+    angle = 0
+    w = img_size[0] 
+    h = img_size[1]
     mid_x = w / 2
     angle, mid_x, lane_flag = mid_line_detect(frame)
-
-    direct, angle_deg = angle_deg_and_dir(angle, err)
-    # if type == 'grass':  
-    #     angle_err = w / 2 - mid_x
-    #     angle_deg = int(angle_deg + 1 * angle_err / 2)
-    angle_deg = limit_angle(angle_deg, angle_limit)  
-    #     if angle_deg > 1:
-    #         if mid_x > w / 2:
-    #             direct = RIGHT
-    #         elif mid_x < w / 2:
-    #             direct = LEFT
+    direct, angle = angle_and_direction(angle, err)
+    #angle = int(angle + 1 * angle_err / 2)
+    #angle_err = img_size[0] / 2 - mid_x
+    #angle = angle + angle_err / 2
+    angle = limit_angle(angle , angle_limit)  
+    #if angle > 1:
+    #    if mid_x > w / 2:
+    #          direct = RIGHT
+    #    elif mid_x < w / 2:
+    #          direct = LEFT
             #else:
                 #direct = STRAIGHT
 
@@ -306,5 +306,5 @@ def line_track(frame, err= 6, angle_limit = 10):
     #my_uart.set_data(direct, 'direction')
     #my_uart.set_data(angle_deg, 'angle')
     print('direct', direct)
-    print('angle_deg', angle_deg)
+    print('angle', angle)
     return lane_flag
