@@ -183,6 +183,10 @@ def mid_line_detect(frame):
     ret,img_bin = cv2.threshold(img_gray, 110, 255, cv2.THRESH_BINARY) 
     # cv2.imshow('img_bin', img_bin)
 
+    kernel = cv2.getstructuringelement(cv2.morph_rect,(5,5))
+    erode = cv2.erode(mask, kernel)
+    dilate = cv2.dilate(erode, kernel, iterations = 2)
+
     edge = cv2.Canny(img_bin, 0, 0)
     # cv2.imshow('edge', edge)
 
