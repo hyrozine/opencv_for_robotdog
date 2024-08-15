@@ -202,7 +202,7 @@ def mid_line_detect(frame):
     #print(masked_edge.shape)
      
      
-    lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 10, maxLineGap = 20)
+    lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 10, maxLineGap = 50)
     # print(lines)
     
     # distinguish the left lines and the right lines
