@@ -15,7 +15,7 @@ from uart import my_uart
 
 class State_Machine():
     def __init__(self):
-        self.state = STATE['state_1_init']
+        self.state = STATE['state_1_out']
         #self.state = STATE['state_3_yellow_climb']
         self.ball_time = 0
         self.now_time = 0
@@ -27,65 +27,63 @@ class State_Machine():
     def state_machine_exe(self, frame):
         #print("now:",self.state)
 
-        if self.state == STATE['state_1_init']:
+        if self.state == STATE['state_1_out']:
             # if self.find_ball(frame) is True:
             #     if self.FLAG_BALL_TYPE['BROWN'] == True:
             #         self.ball_user = 1
             #     elif self.FLAG_BALL_TYPE['PRUPLE'] == True:
             #         self.ball_user = 2  
             #     my_uart.send_data()
-            #     self.state_trans(STATE['state_2_blue_climb'])
             # else:
-            line_track(frame)
-            my_uart.send_data()
-            my_uart.clear_data()
+            #line_track(frame)
+            #my_uart.send_data()
+            #my_uart.clear_data()
+            self.state_trans(STATE['state_2_obstacle'])
 
-        elif self.state == STATE['state_2_blue_climb']:
+        elif self.state == STATE['state_2_obstacle']:
             if self.find_blue_upstair(frame) is True:
                 my_uart.send_data()
-                self.state_trans(STATE['state_3_red_turn'])
+                self.state_trans(STATE['state_3_upstair'])
             else:
-                line_track(frame.copy(), err=1, type='grass', angle_limit=30)
-
-                # light.pulse_width_percent(18)
-
+                line_track(frame.copy())
                 my_uart.send_data()
             my_uart.clear_data()
 
-        elif self.state == STATE['state_3_red_turn']:
+        elif self.state == STATE['state_3_upstair']:
+            self.state_trans(STATE['state_4_downstair'])
+            my_uart.clear_data()
+        elif self.state == STATE['state_4_downstair']:
             if self.find_red_divpath(frame) is True :
                 my_uart.send_data()
-                self.state_trans(STATE['state_4_user'])
+                self.state_trans(STATE['state_5_user1'])
+                self.state_trans(STATE['state_5_user2'])
             else:
-                # light.pulse_width_percent(18)
-
-                line_track(frame.copy(), err=1, type='grass', angle_limit=30)
+                line_track(frame.copy())
                 my_uart.send_data()
             my_uart.clear_data()
-        elif self.state == STATE['state_4_user']:
+        elif self.state == STATE['state_5_user1']:
             if self.find_user(frame, self.ball_user):
-                my_uart.set_data(1, 'isOpen')
+                #my_uart.set_data(1, 'isOpen')
                 my_uart.send_data()
-                self.state_trans(STATE['state_5_orange_end'])
             else:
-                line_track(frame.copy(), err=1, type = 'grass', angle_limit=30)
+                line_track(frame.copy())
+                my_uart.send_data()
             my_uart.clear_data()
-        elif self.state == STATE['state_5_orange_end']:
+        elif self.state == STATE['state_5_user2']:
+            if self.find_user(frame, self.ball_user):
+                #my_uart.set_data(1, 'isOpen')
+                my_uart.send_data()
+            else:
+                line_track(frame.copy())
+                my_uart.send_data()
+            my_uart.clear_data()
+        elif self.state == STATE['state_6_backhome']:
             if self.find_orange_end(frame, 2) is True:
                 my_uart.send_data()
-                self.state_trans(STATE['state_6_turn_in'])
+                self.state_trans(STATE['state_1_out'])
                 #light.pulse_width_percent(10)  # 控制亮度 0~100完成
             else:
-                line_track(frame.copy(), err=1, type='grass', angle_limit=30)
-                my_uart.send_data()
-            my_uart.clear_data()
-        elif self.state == STATE['state_6_turn_in']:
-            if line_track(frame.copy(), err = 10, type = 'turn', angle_limit=50):
-                my_uart.send_data()
-            else:
-                my_uart.set_data(STRAIGHT, 'direction')
-                my_uart.set_data(90, 'angle')
-                self.state_trans(STATE['state_1_recognize_ball'])
+                line_track(frame.copy())
                 my_uart.send_data()
             my_uart.clear_data()
         else:
@@ -93,43 +91,50 @@ class State_Machine():
 
     def state_trans(self, st):
         N = 20
-        if st == STATE['state_1_recognize_ball']:
+        if st == STATE['state_1_out']:
             for i in range(N):
                 info = my_uart.receive_data()
                 if '1' in info:
                     self.state = st  # 状态转移成功
-                    print("finished")
+                    print("out")
                     break
-        elif st == STATE['state_2_blue_climb']:
+        elif st == STATE['state_2_obstacle']:
             for i in range(N):
                 info = my_uart.receive_data()
                 if '2' in info:
                     self.state = st  # 状态转移成功
-                    print('recieved ball')
+                    print('upstair')
                     # self.blue_time = pyb.millis() # TODO: 
                     break
-        elif st == STATE['state_3_red_turn']:
+        elif st == STATE['state_3_upstair']:
             for i in range(N):
                 info = my_uart.receive_data()
                 if '3' in info:
                     self.state = st  # 状态转移成功
-                    print('upstairs!!!')
+                    print('downstair')
                     break
-        elif st == STATE['state_4_user']:
+        elif st == STATE['state_4_downstair']:
             for i in range(N):
                 info = my_uart.receive_data()
                 if '4' in info:
                     self.state = st  # 状态转移成功
                     print('near user')
                     break
-        elif st == STATE['state_5_orange_end']:
+        elif st == STATE['state_5_user1']:
             for i in range(N):
                 info = my_uart.receive_data()
                 if '5' in info:
                     self.state = st
-                    print('user has been found!')
+                    print('user1 has been found!')
                     break
-        elif st == STATE['state_6_turn_in']:
+        elif st == STATE['state_5_user2']:
+            for i in range(N):
+                info = my_uart.receive_data()
+                if '5' in info:
+                    self.state = st
+                    print('user2 has been found!')
+                    break
+        elif st == STATE['state_6_backhome']:
             for i in range(N):
                 info = my_uart.receive_data()
                 if '6' in info:

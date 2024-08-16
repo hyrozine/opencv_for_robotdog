@@ -26,15 +26,14 @@ BALL_COLOR_THRESHOLD = {
 }
 
 STATE = {
-    'state_1_init': 1,
-    'state_1_out': 2,
-    'state_2_obstacle': 3,
-    'state_3_upstair': 4,
-    'state_4_downstair': 5,
-    'state_5_user1': 6,
-    'state_5_user2': 7,
-    'state_6_backhome': 8,
-    'state_7_debug': 9
+    'state_1_out': 1,
+    'state_2_obstacle': 2,
+    'state_3_upstair': 3,
+    'state_4_downstair': 4,
+    'state_5_user1': 5,
+    'state_5_user2': 6,
+    'state_6_backhome': 7,
+    'state_7_debug': 8
 }
 
 LEFT = 1
