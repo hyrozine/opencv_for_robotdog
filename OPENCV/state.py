@@ -35,9 +35,9 @@ class State_Machine():
             #         self.ball_user = 2  
             #     my_uart.send_data()
             # else:
-            #line_track(frame)
-            #my_uart.send_data()
-            #my_uart.clear_data()
+            line_track(frame)
+            my_uart.send_data()
+            my_uart.clear_data()
             self.state_trans(STATE['state_2_obstacle'])
 
         elif self.state == STATE['state_2_obstacle']:
