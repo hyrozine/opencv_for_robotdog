@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-#from uart import my_uart
+from uart import my_uart
 from utils import STRAIGHT, LEFT, RIGHT, limit_angle, img_size, offset_turn_right, offset_turn_left
 def calculate_slope(line):
     x1, y1, x2, y2 = line[0]
@@ -193,7 +193,7 @@ def mid_line_detect(frame):
     mask = np.zeros_like(edge)
     # mask = cv2.fillPoly(mask, np.array([[[100,415], [300, 313], [1000, 305], [1500, 415]]]), color = 255)   # TODO: need to be specified
     #mask = cv2.fillPoly(mask, np.array([[[0,mask.shape[0] // 4 * 3], [0, mask.shape[0] // 2], [1280, mask.shape[0] // 2], [1280, mask.shape[0] // 4 * 3]]]), color = 255)   # TODO: need to be specified
-    mask = cv2.fillPoly(mask, np.array([[[0, mask.shape[0] // 3], [0, mask.shape[0] // 3 - 50], [1280, mask.shape[0] // 3 - 50], [1280, mask.shape[0] // 3 ]]]), color = 255)   # TODO: need to be specified
+    mask = cv2.fillPoly(mask, np.array([[[0, mask.shape[0] // 2], [0, mask.shape[0] // 3 - 50], [1280, mask.shape[0] // 2 - 50], [1280, mask.shape[0] // 3 ]]]), color = 255)   # TODO: need to be specified
     #cv2.imshow('mask', mask)
 
     # print(mask.shape[0] // 3)
@@ -269,7 +269,7 @@ def mid_line_detect(frame):
         angle, mid_x = lose_line_walk(right_lower, right_upper, lane_flag, frame)
         return angle, mid_x, lane_flag
 
-def line_track(frame, err= 5, angle_limit = 10):
+def line_track(frame, err= 10, angle_limit = 10):
     
     direct = STRAIGHT
     angle = 0
@@ -307,8 +307,8 @@ def line_track(frame, err= 5, angle_limit = 10):
     #         elif mid_x / 2 < w/2 - offset_default:
     #             direct = LEFT
 
-    #my_uart.set_data(direct, 'direction')
-    #my_uart.set_data(angle_deg, 'angle')
+    my_uart.set_data(direct, 'direction')
+    my_uart.set_data(angle_deg, 'angle')
     print('direct', direct)
     print('angle', angle)
     return lane_flag
