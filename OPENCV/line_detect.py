@@ -183,11 +183,11 @@ def mid_line_detect(frame):
     ret,img_bin = cv2.threshold(img_gray, 110, 255, cv2.THRESH_BINARY) 
     # cv2.imshow('img_bin', img_bin)
 
-    kernel = cv2.getstructuringelement(cv2.morph_rect,(5,5))
-    erode = cv2.erode(mask, kernel)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+    erode = cv2.erode(img_bin, kernel)
     dilate = cv2.dilate(erode, kernel, iterations = 2)
 
-    edge = cv2.Canny(img_bin, 0, 0)
+    edge = cv2.Canny(dilate, 0, 0)
     # cv2.imshow('edge', edge)
 
     mask = np.zeros_like(edge)
@@ -202,7 +202,7 @@ def mid_line_detect(frame):
     #print(masked_edge.shape)
      
      
-    lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 10, maxLineGap = 50)
+    lines = cv2.HoughLinesP(masked_edge, 1, np.pi/180, 15, minLineLength = 20, maxLineGap = 100)
     # print(lines)
     
     # distinguish the left lines and the right lines
